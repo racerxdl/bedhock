@@ -6,7 +6,11 @@
 #include "hook.h"
 
 void *Hook::Level_onPlayerDeath(void *thisObj, void *player, void *actorDamageSource) {
-    subhook::ScopedHookRemove remove(singleton->getHook(__func__));
+    static subhook::Hook *hook;
+    if (hook == nullptr) {
+        hook = singleton->getHook(__func__);
+    }
+    subhook::ScopedHookRemove remove(hook);
     const char *username = ((char *) player) + 0x900;
     std::cout << "Player " << username << " died" << std::endl;
 
@@ -14,7 +18,12 @@ void *Hook::Level_onPlayerDeath(void *thisObj, void *player, void *actorDamageSo
 }
 
 void *Hook::ServerNetworkHandler_handle_PlayerAuthInputPacket(void *thisObj, void *networkIdentifier, void *playerAuthInputPacket) {
-    subhook::ScopedHookRemove remove(singleton->getHook(__func__));
+    static subhook::Hook *hook;
+    if (hook == nullptr) {
+        hook = singleton->getHook(__func__);
+    }
+    subhook::ScopedHookRemove remove(hook);
+
     auto base = (float *) ((char *) playerAuthInputPacket + 0x2C);
     auto hash = singleton->o_NetworkIdentifier_getHash(networkIdentifier);
 
@@ -25,9 +34,7 @@ void *Hook::ServerNetworkHandler_handle_PlayerAuthInputPacket(void *thisObj, voi
     float Z = base[4];
     float headYaw = base[5];
 
-//    if (hash == 0) {
-        std::cout << "Hash: " << hash << " X: " << X << " Y: " << Y << " Z: " << Z << std::endl;
-//    }
+//    std::cout << "Hash: " << hash << " X: " << X << " Y: " << Y << " Z: " << Z << std::endl;
 
     return singleton->o_ServerNetworkHandler_handle_PlayerAuthInputPacket(thisObj, networkIdentifier, playerAuthInputPacket);
 }

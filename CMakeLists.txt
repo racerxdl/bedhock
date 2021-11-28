@@ -8,8 +8,8 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(SUBHOOK_STATIC ON)
 set(BUILD_SHARED_LIBS ON)
-set(CMAKE_CXX_FLAGS "-fPIC")
-set(CMAKE_C_FLAGS "-fPIC")
+set(CMAKE_CXX_FLAGS "-fPIC -O2")
+set(CMAKE_C_FLAGS "-fPIC -O2")
 
 add_subdirectory(subhook)
 
