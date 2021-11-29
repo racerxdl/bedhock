@@ -53,6 +53,9 @@ void *Hook::ServerNetworkHandler_onClientAuthenticated(void *thisObj, void *netw
 
     std::cout << "User " << username << " (" << xuid << ") logged in." << std::endl;
 
+    singleton->hashToNetworkIdentifier[hash] = (NetworkIdentifier*)networkIdentifier;
+    singleton->playerToHash[username] = hash;
+
     return singleton->o_ServerNetworkHandler_onClientAuthenticated(thisObj, networkIdentifier, certificate);
 }
 
@@ -65,6 +68,14 @@ void *Hook::ServerNetworkHandler_onPlayerLeft(void *thisObj, void *serverPlayer,
 
     const char *username = ((char *) serverPlayer) + 0x900;
     std::cout << "Player " << username << " left" << std::endl;
+
+    try {
+        auto hash = singleton->playerToHash.at(username);
+        singleton->playerToHash.erase(username);
+        singleton->hashToNetworkIdentifier.erase(hash);
+    } catch (const std::out_of_range &) {
+        // Player was not in table
+    }
 
     return singleton->o_ServerNetworkHandler_onPlayerLeft(thisObj, serverPlayer, something);
 }

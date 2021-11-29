@@ -39,9 +39,18 @@ void Hook::Init(const SymbolMap &sym) {
     BIND(ulong(void * ), __fn_NetworkIdentifier_getHash, o_NetworkIdentifier_getHash);
     BIND(void (std::string&, void *), __fn_ExtendedCertificate_getIdentityName, o_ExtendedCertificate_getIdentityName);
     BIND(void (std::string&, void *), __fn_ExtendedCertificate_getXuid, o_ExtendedCertificate_getXuid);
-    BIND(void(void *, std::string, std::string, std::string, std::string), __fn_TextPacket_createChat, o_TextPacket_createChat);
-    BIND(void(void *), __fn_TextPacket_TextPacket, o_TextPacket_TextPacket);
-    BIND(void(void *), __fn_TextPacket_destructor, o_TextPacket_destructor);
+    BIND(void(void * , std::string, std::string, std::string, std::string), __fn_TextPacket_createChat, o_TextPacket_createChat);
+    BIND(void(void * ), __fn_TextPacket_TextPacket, o_TextPacket_TextPacket);
+    BIND(void(void * ), __fn_TextPacket_destructor, o_TextPacket_destructor);
+
+    BIND(void(void * , std::string), __fn_TextPacket_createRaw, o_TextPacket_createRaw);
+    BIND(void(void * , std::string, std::vector<std::string>), __fn_TextPacket_createTranslated, o_TextPacket_createTranslated);
+    BIND(void(void * , std::string), __fn_TextPacket_createSystemMessage, o_TextPacket_createSystemMessage);
+    BIND(void(void * , std::string const&, std::string const&, std::string const&, std::string const&), __fn_TextPacket_createAnnouncement, o_TextPacket_createAnnouncement);
+    BIND(void(void * , std::string const&, std::string const&, std::string const&, std::string const&), __fn_TextPacket_createTranslatedAnnouncement, o_TextPacket_createTranslatedAnnouncement);
+    BIND(void(void * , std::string const&, std::string const&, std::string const&, std::string const&), __fn_TextPacket_createTranslatedChat, o_TextPacket_createTranslatedChat);
+    BIND(void(void * , std::string const&, std::vector<std::string> const&), __fn_TextPacket_createJukeboxPopup, o_TextPacket_createJukeboxPopup);
+    BIND(void(void * , std::string const&, std::string const&, std::string const&, std::string const&), __fn_TextPacket_createWhisper, o_TextPacket_createWhisper);
 }
 
 subhook::Hook *Hook::getHook(const std::string &name) {
@@ -80,6 +89,15 @@ bool Hook::hookFunc(const std::string &name, const std::string &hname, std::func
     return false;
 }
 
-void *Hook::getFunctionPointer(const std::string& name) {
+void *Hook::getFunctionPointer(const std::string &name) {
     return singleton->symMap.getFunction(name);
+}
+
+NetworkIdentifier *Hook::getPlayerNetworkIdentifier(const std::string &name) {
+    try {
+        auto hash = playerToHash.at(name);
+        return hashToNetworkIdentifier.at(hash);
+    } catch (const std::out_of_range &) {
+        return nullptr;
+    }
 }

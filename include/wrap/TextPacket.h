@@ -7,20 +7,30 @@
 #include <hook.h>
 
 class WrappedTextPacket {
-    char content[0xE0];
+    char content[0xE0]{};
     Hook *hook;
 public:
-    WrappedTextPacket(Hook *);
+    explicit WrappedTextPacket(Hook *);
+
     ~WrappedTextPacket();
+
     Packet *get();
 
-    void createRaw(std::string const&);
-    void createChat(std::string const&, std::string const&, std::string const&, std::string const&);
-    void createTranslatedChat(std::string const&, std::string const&, std::string const&, std::string const&);
-    void createTranslated(std::string const&, std::vector<std::string> const&);
-    void createSystemMessage(std::string const&);
-    void createWhisper(std::string const&, std::string const&, std::string const&, std::string const&);
-    void createAnnouncement(std::string const&, std::string const&, std::string const&, std::string const&);
-    void createTranslatedAnnouncement(std::string const&, std::string const&, std::string const&, std::string const&);
-    void createJukeboxPopup(std::string const&);
+    void createRaw(std::string const &message);
+
+    void createChat(std::string const &sourceName, std::string const &message, std::string const &param2 = "", std::string const &param3 = "");
+
+    void createTranslatedChat(std::string const &sourceName, std::string const &message, std::string const &param2 = "", std::string const &param3 = "");
+
+    void createTranslated(std::string const &message, const std::vector<std::string> &params = {});
+
+    void createSystemMessage(std::string const &message);
+
+    void createWhisper(std::string const &sourceName, std::string const &message, std::string const &param2 = "", std::string const &param3 = "");
+
+    void createAnnouncement(std::string const &sourceName, std::string const &message, std::string const &param2 = "", std::string const &param3 = "");
+
+    void createTranslatedAnnouncement(std::string const &sourceName, std::string const &message, std::string const &param2 = "", std::string const &param3 = "");
+
+    void createJukeboxPopup(std::string const &message, std::vector<std::string> const &params = {});
 };

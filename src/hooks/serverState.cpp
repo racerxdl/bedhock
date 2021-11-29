@@ -4,9 +4,8 @@
 
 #include <iostream>
 #include <chrono>
-#include <wrap/TextPacket.h>
+#include <wrap/Server.h>
 #include "hook.h"
-#include "fakemine/fakemine.h"
 
 auto lastSend = std::chrono::system_clock::now();
 
@@ -16,15 +15,16 @@ void *Hook::ServerNetworkHandler_onTick(void *thisObj) {
         hook = singleton->getHook(__func__);
     }
     subhook::ScopedHookRemove remove(hook);
-    auto handler = (ServerNetworkHandler *) thisObj;
-    // TICK
+    WrappedServer server(singleton, thisObj);
     auto delta = std::chrono::duration_cast<std::chrono::seconds>((std::chrono::system_clock::now() - lastSend));
 
     if (delta.count() >= 5) {
-        WrappedTextPacket packet(singleton);
-        packet.createChat("Test0", "test1", "test2", "test3");
-        std::cout << "Sending packet" << std::endl;
-        handler->packetSender->sendBroadcast(packet.get());
+        server.broadcastMessage("The Server", "The Message");
+
+        for (auto const &p: singleton->playerToHash) {
+            server.sendMessageTo("Server", p.first, "Henlo "  + p.first);
+        }
+
         lastSend = std::chrono::system_clock::now();
     }
 

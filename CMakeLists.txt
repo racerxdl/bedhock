@@ -15,7 +15,7 @@ set(CMAKE_BUILD_TYPE Debug)
 add_subdirectory(subhook)
 
 # Find source files
-file(GLOB SOURCES src/hooks/*.cpp src/wrap/*.cpp src/*.cpp)
+file(GLOB SOURCES src/wrap/*.cpp src/hooks/*.cpp src/*.cpp)
 
 add_library(${PROJECT_NAME} SHARED ${SOURCES})
 

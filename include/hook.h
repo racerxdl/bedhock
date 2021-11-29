@@ -22,6 +22,8 @@ private:
     SymbolMap symMap;
     std::vector<subhook::Hook *> hooks;
     std::map<std::string, subhook::Hook *> nameToHook;
+    std::map<ulong, NetworkIdentifier *> hashToNetworkIdentifier;
+    std::map<std::string, ulong> playerToHash;
 
     Hook();
 
@@ -64,6 +66,8 @@ public:
 
     static void *getFunctionPointer(const std::string &name);
 
+    NetworkIdentifier *getPlayerNetworkIdentifier(const std::string &name);
+
     // Bind only functions
     std::function<ulong(void *)> o_NetworkIdentifier_getHash;
     std::function<void(std::string &, void *)> o_ExtendedCertificate_getIdentityName;
@@ -71,4 +75,12 @@ public:
     std::function<void(void *)> o_TextPacket_TextPacket;
     std::function<void(void *)> o_TextPacket_destructor;
     std::function<void(void *, std::string, std::string, std::string, std::string)> o_TextPacket_createChat;
+    std::function<void(void *, std::string const&, std::string const&, std::string const&, std::string const&)> o_TextPacket_createTranslatedAnnouncement;
+    std::function<void(void *, std::string)> o_TextPacket_createRaw;
+    std::function<void(void *, std::string, std::vector<std::string>)> o_TextPacket_createTranslated;
+    std::function<void(void *, std::string)> o_TextPacket_createSystemMessage;
+    std::function<void(void *, std::string const&, std::string const&, std::string const&, std::string const&)> o_TextPacket_createAnnouncement;
+    std::function<void(void *, std::string const&, std::string const&, std::string const&, std::string const&)> o_TextPacket_createTranslatedChat;
+    std::function<void(void *, std::string const&, std::vector<std::string> const&)> o_TextPacket_createJukeboxPopup;
+    std::function<void(void *, std::string const&, std::string const&, std::string const&, std::string const&)> o_TextPacket_createWhisper;
 };

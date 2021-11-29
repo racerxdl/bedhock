@@ -15,7 +15,7 @@ SymbolMap::SymbolMap(const SymbolMap& map) {
 
 SymbolMap::SymbolMap(const std::string &filename) {
     elfio reader;
-
+    std::cout << "Loading symbols from " << filename << std::endl;
     if (!reader.load(filename)) {
         std::cerr << "Error loading file " << filename << std::endl;
         return;

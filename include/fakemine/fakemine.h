@@ -93,7 +93,7 @@ public:
 
     virtual void sendToServer(Packet &) = 0;
 
-    virtual void sendToClient(NetworkIdentifier const &, Packet const &, unsigned char) = 0;
+    virtual void sendToClient(NetworkIdentifier const *, Packet const *, unsigned char) = 0;
 
     virtual void sendToClients(std::vector<long> const &, Packet const &) = 0;
 
