@@ -3,12 +3,10 @@
 //
 
 #include <symbolmap.h>
+#include <iostream>
+
 #include "hook.h"
 #include "hookNames.h"
-
-#define TYPE_NAME(x) #x
-
-#include <iostream>
 
 #define HOOKFUNC(type, symbol, source, target) (hookFunc<type>(symbol, #target, source, (void *)target))
 #define BIND(type, symbol, target) (bind<type>(symbol, target))
@@ -34,8 +32,16 @@ void Hook::Init(const SymbolMap &sym) {
     HOOKFUNC(threeArgVoid, __fn_ServerNetworkHandler_displayGameMessage, o_ServerNetworkHandler_displayGameMessage, Hook::ServerNetworkHandler_displayGameMessage);
     HOOKFUNC(threeArgVoid, __fn_Level_onPlayerDeath, o_Level_onPlayerDeath, Hook::Level_onPlayerDeath);
     HOOKFUNC(threeArgVoid, __fn_ServerNetworkHandler_handle_PlayerAuthInputPacketName, o_ServerNetworkHandler_handle_PlayerAuthInputPacket, Hook::ServerNetworkHandler_handle_PlayerAuthInputPacket);
+    HOOKFUNC(threeArgVoid, __fn_ServerNetworkHandler_onClientAuthenticated, o_ServerNetworkHandler_onClientAuthenticated, Hook::ServerNetworkHandler_onClientAuthenticated);
+    HOOKFUNC(threeArgVoid, __fn_ServerNetworkHandler_onPlayerLeft, o_ServerNetworkHandler_onPlayerLeft, Hook::ServerNetworkHandler_onPlayerLeft);
+    HOOKFUNC(oneArgVoid, __fn_ServerNetworkHandler_onTick, o_ServerNetworkHandler_onTick, Hook::ServerNetworkHandler_onTick);
 
-    BIND(ulong(void*), __fn_NetworkIdentifier_getHash, o_NetworkIdentifier_getHash);
+    BIND(ulong(void * ), __fn_NetworkIdentifier_getHash, o_NetworkIdentifier_getHash);
+    BIND(void (std::string&, void *), __fn_ExtendedCertificate_getIdentityName, o_ExtendedCertificate_getIdentityName);
+    BIND(void (std::string&, void *), __fn_ExtendedCertificate_getXuid, o_ExtendedCertificate_getXuid);
+    BIND(void(void *, std::string, std::string, std::string, std::string), __fn_TextPacket_createChat, o_TextPacket_createChat);
+    BIND(void(void *), __fn_TextPacket_TextPacket, o_TextPacket_TextPacket);
+    BIND(void(void *), __fn_TextPacket_destructor, o_TextPacket_destructor);
 }
 
 subhook::Hook *Hook::getHook(const std::string &name) {
@@ -46,9 +52,10 @@ subhook::Hook *Hook::getHook(const std::string &name) {
     }
 }
 
-template <typename T> bool Hook::bind(const std::string &name, std::function<T> &hook) {
+template<typename T>
+bool Hook::bind(const std::string &name, std::function<T> &hook) {
     std::cout << "Binding " << name << std::endl;
-    hook = (T *)this->symMap.getFunction(name);
+    hook = (T *) this->symMap.getFunction(name);
     return hook != nullptr;
 }
 
@@ -57,7 +64,7 @@ bool Hook::hookFunc(const std::string &name, const std::string &hname, std::func
     auto shortName = hname.substr(6); // Strip hook:: from name
     std::cout << "Hooking " << name << " to " << shortName << std::endl;
     auto ptr = this->symMap.getFunction(name);
-    hookOrigFn = (T *)ptr;
+    hookOrigFn = (T *) ptr;
     if (hookOrigFn != nullptr) {
         auto h = new subhook::Hook();
         if (!h->Install((void *) ptr, (void *) target, subhook::HookFlag64BitOffset)) {
@@ -71,4 +78,8 @@ bool Hook::hookFunc(const std::string &name, const std::string &hname, std::func
     }
 
     return false;
+}
+
+void *Hook::getFunctionPointer(const std::string& name) {
+    return singleton->symMap.getFunction(name);
 }

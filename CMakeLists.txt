@@ -10,11 +10,13 @@ set(SUBHOOK_STATIC ON)
 set(BUILD_SHARED_LIBS ON)
 set(CMAKE_CXX_FLAGS "-fPIC -O2")
 set(CMAKE_C_FLAGS "-fPIC -O2")
+set(CMAKE_BUILD_TYPE Debug)
 
 add_subdirectory(subhook)
 
 # Find source files
-file(GLOB SOURCES src/hooks/*.cpp src/*.cpp)
+file(GLOB SOURCES src/hooks/*.cpp src/wrap/*.cpp src/*.cpp)
+
 add_library(${PROJECT_NAME} SHARED ${SOURCES})
 
 # Include header files

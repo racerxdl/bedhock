@@ -3,11 +3,13 @@
 //
 #include <iostream>
 #include "hook.h"
-#include "hookNames.h"
-
 
 void *Hook::ServerNetworkHandler_displayGameMessage(void *thisObj, void *player, void *chatEvent) {
-    subhook::ScopedHookRemove remove(singleton->getHook(__func__));
+    static subhook::Hook *hook;
+    if (hook == nullptr) {
+        hook = singleton->getHook(__func__);
+    }
+    subhook::ScopedHookRemove remove(hook);
 
     const char *message = *((char **)chatEvent);
     const char *username = ((char *)chatEvent) + 0x68;

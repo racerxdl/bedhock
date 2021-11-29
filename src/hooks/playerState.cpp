@@ -38,3 +38,33 @@ void *Hook::ServerNetworkHandler_handle_PlayerAuthInputPacket(void *thisObj, voi
 
     return singleton->o_ServerNetworkHandler_handle_PlayerAuthInputPacket(thisObj, networkIdentifier, playerAuthInputPacket);
 }
+
+void *Hook::ServerNetworkHandler_onClientAuthenticated(void *thisObj, void *networkIdentifier, void *certificate) {
+    static subhook::Hook *hook;
+    if (hook == nullptr) {
+        hook = singleton->getHook(__func__);
+    }
+    subhook::ScopedHookRemove remove(hook);
+    auto hash = singleton->o_NetworkIdentifier_getHash(networkIdentifier);
+    std::string username, xuid;
+
+    singleton->o_ExtendedCertificate_getIdentityName(username, certificate);
+    singleton->o_ExtendedCertificate_getXuid(xuid, certificate);
+
+    std::cout << "User " << username << " (" << xuid << ") logged in." << std::endl;
+
+    return singleton->o_ServerNetworkHandler_onClientAuthenticated(thisObj, networkIdentifier, certificate);
+}
+
+void *Hook::ServerNetworkHandler_onPlayerLeft(void *thisObj, void *serverPlayer, void *something) {
+    static subhook::Hook *hook;
+    if (hook == nullptr) {
+        hook = singleton->getHook(__func__);
+    }
+    subhook::ScopedHookRemove remove(hook);
+
+    const char *username = ((char *) serverPlayer) + 0x900;
+    std::cout << "Player " << username << " left" << std::endl;
+
+    return singleton->o_ServerNetworkHandler_onPlayerLeft(thisObj, serverPlayer, something);
+}
