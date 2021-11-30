@@ -101,3 +101,33 @@ NetworkIdentifier *Hook::getPlayerNetworkIdentifier(const std::string &name) {
         return nullptr;
     }
 }
+
+bool Hook::ReadInputEvent(std::shared_ptr<HockEvent> &event) {
+    return singleton->input.Consume(event);
+}
+
+bool Hook::ReadOutputEvent(std::shared_ptr<HockEvent> &event) {
+    return singleton->output.Consume(event);
+}
+void Hook::WriteInputEvent(std::shared_ptr<HockEvent> event) {
+    if (singleton->input.Size() >= MAX_QUEUE_LENGTH) {
+        auto discard = std::make_shared<HockEvent>();
+        std::ignore = singleton->input.Consume(discard); // Discard one
+    }
+    singleton->input.Produce(std::move(event));
+}
+void Hook::WriteOutputEvent(std::shared_ptr<HockEvent> event) {
+    if (singleton->output.Size() >= MAX_QUEUE_LENGTH) {
+        auto discard = std::make_shared<HockEvent>();
+        std::ignore = singleton->output.Consume(discard); // Discard one
+    }
+    singleton->output.Produce(std::move(event));
+}
+
+std::vector<std::string> Hook::playerList() {
+    std::vector<std::string> players;
+    for (const auto& p: playerToHash) {
+        players.push_back(p.first);
+    }
+    return players;
+}

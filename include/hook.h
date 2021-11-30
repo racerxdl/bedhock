@@ -8,7 +8,11 @@
 #include <vector>
 #include <functional>
 #include <fakemine/fakemine.h>
+#include <event/event.h>
 #include "symbolmap.h"
+#include "SafeQueue.hpp"
+
+#define MAX_QUEUE_LENGTH 512
 
 typedef void *(oneArgVoid)(void *);
 
@@ -24,6 +28,8 @@ private:
     std::map<std::string, subhook::Hook *> nameToHook;
     std::map<ulong, NetworkIdentifier *> hashToNetworkIdentifier;
     std::map<std::string, ulong> playerToHash;
+    std::map<ulong, std::string> hashToPlayer;
+    std::map<std::string, std::string> playerToXuid;
 
     Hook();
 
@@ -44,6 +50,9 @@ private:
     std::function<threeArgVoid> o_ServerNetworkHandler_onClientAuthenticated;
     std::function<threeArgVoid> o_ServerNetworkHandler_onPlayerLeft;
     std::function<oneArgVoid> o_ServerNetworkHandler_onTick;
+
+    // Event Queues
+    SafeQueue<std::shared_ptr<HockEvent>> input, output;
 
 protected:
     // Hook Callbacks
@@ -75,12 +84,23 @@ public:
     std::function<void(void *)> o_TextPacket_TextPacket;
     std::function<void(void *)> o_TextPacket_destructor;
     std::function<void(void *, std::string, std::string, std::string, std::string)> o_TextPacket_createChat;
-    std::function<void(void *, std::string const&, std::string const&, std::string const&, std::string const&)> o_TextPacket_createTranslatedAnnouncement;
+    std::function<void(void *, std::string const &, std::string const &, std::string const &, std::string const &)> o_TextPacket_createTranslatedAnnouncement;
     std::function<void(void *, std::string)> o_TextPacket_createRaw;
     std::function<void(void *, std::string, std::vector<std::string>)> o_TextPacket_createTranslated;
     std::function<void(void *, std::string)> o_TextPacket_createSystemMessage;
-    std::function<void(void *, std::string const&, std::string const&, std::string const&, std::string const&)> o_TextPacket_createAnnouncement;
-    std::function<void(void *, std::string const&, std::string const&, std::string const&, std::string const&)> o_TextPacket_createTranslatedChat;
-    std::function<void(void *, std::string const&, std::vector<std::string> const&)> o_TextPacket_createJukeboxPopup;
-    std::function<void(void *, std::string const&, std::string const&, std::string const&, std::string const&)> o_TextPacket_createWhisper;
+    std::function<void(void *, std::string const &, std::string const &, std::string const &, std::string const &)> o_TextPacket_createAnnouncement;
+    std::function<void(void *, std::string const &, std::string const &, std::string const &, std::string const &)> o_TextPacket_createTranslatedChat;
+    std::function<void(void *, std::string const &, std::vector<std::string> const &)> o_TextPacket_createJukeboxPopup;
+    std::function<void(void *, std::string const &, std::string const &, std::string const &, std::string const &)> o_TextPacket_createWhisper;
+
+    std::vector<std::string> playerList();
+
+    // Event Queue Management
+    static bool ReadInputEvent(std::shared_ptr<HockEvent> &event);
+
+    static bool ReadOutputEvent(std::shared_ptr<HockEvent> &event);
+
+    static void WriteInputEvent(std::shared_ptr<HockEvent> event);
+
+    static void WriteOutputEvent(std::shared_ptr<HockEvent> event);
 };

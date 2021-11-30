@@ -3,6 +3,7 @@
 //
 
 #include <iostream>
+#include <event/playerupdate.h>
 #include "hook.h"
 
 void *Hook::Level_onPlayerDeath(void *thisObj, void *player, void *actorDamageSource) {
@@ -13,6 +14,10 @@ void *Hook::Level_onPlayerDeath(void *thisObj, void *player, void *actorDamageSo
     subhook::ScopedHookRemove remove(hook);
     const char *username = ((char *) player) + 0x900;
     std::cout << "Player " << username << " died" << std::endl;
+
+    auto xuid = singleton->playerToXuid[username];
+    auto p = std::make_shared<PlayerDeath>(username, xuid);
+    WriteOutputEvent(p);
 
     return singleton->o_Level_onPlayerDeath(thisObj, player, actorDamageSource);
 }
@@ -26,6 +31,8 @@ void *Hook::ServerNetworkHandler_handle_PlayerAuthInputPacket(void *thisObj, voi
 
     auto base = (float *) ((char *) playerAuthInputPacket + 0x2C);
     auto hash = singleton->o_NetworkIdentifier_getHash(networkIdentifier);
+    auto username = singleton->hashToPlayer[hash];
+    auto xuid = singleton->playerToXuid[username];
 
     float pitch = base[0];
     float yaw = base[1];
@@ -34,7 +41,8 @@ void *Hook::ServerNetworkHandler_handle_PlayerAuthInputPacket(void *thisObj, voi
     float Z = base[4];
     float headYaw = base[5];
 
-//    std::cout << "Hash: " << hash << " X: " << X << " Y: " << Y << " Z: " << Z << std::endl;
+    auto p = std::make_shared<PlayerUpdate>(username, xuid, pitch, yaw, X, Y, Z, headYaw);
+    WriteOutputEvent(p);
 
     return singleton->o_ServerNetworkHandler_handle_PlayerAuthInputPacket(thisObj, networkIdentifier, playerAuthInputPacket);
 }
@@ -55,6 +63,11 @@ void *Hook::ServerNetworkHandler_onClientAuthenticated(void *thisObj, void *netw
 
     singleton->hashToNetworkIdentifier[hash] = (NetworkIdentifier*)networkIdentifier;
     singleton->playerToHash[username] = hash;
+    singleton->playerToXuid[username] = xuid;
+    singleton->hashToPlayer[hash] = username;
+
+    auto p = std::make_shared<PlayerJoin>(username, xuid);
+    WriteOutputEvent(p);
 
     return singleton->o_ServerNetworkHandler_onClientAuthenticated(thisObj, networkIdentifier, certificate);
 }
@@ -69,10 +82,16 @@ void *Hook::ServerNetworkHandler_onPlayerLeft(void *thisObj, void *serverPlayer,
     const char *username = ((char *) serverPlayer) + 0x900;
     std::cout << "Player " << username << " left" << std::endl;
 
+    auto xuid = singleton->playerToXuid[username];
+    auto p = std::make_shared<PlayerLeft>(username, xuid);
+    WriteOutputEvent(p);
+
     try {
         auto hash = singleton->playerToHash.at(username);
         singleton->playerToHash.erase(username);
+        singleton->playerToXuid.erase(username);
         singleton->hashToNetworkIdentifier.erase(hash);
+        singleton->hashToPlayer.erase(hash);
     } catch (const std::out_of_range &) {
         // Player was not in table
     }

@@ -42,12 +42,12 @@ void WrappedTextPacket::createWhisper(std::string const &sourceName, std::string
     hook->o_TextPacket_createWhisper(get(), sourceName, message, param2, param3);
 }
 
-void WrappedTextPacket::createAnnouncement(std::string const &sourceName, std::string const &message, std::string const &param2, std::string const &param3) {
-    hook->o_TextPacket_createAnnouncement(get(), sourceName, message, param2, param3);
+void WrappedTextPacket::createAnnouncement(std::string const &message, std::string const &param2, std::string const &param3) {
+    hook->o_TextPacket_createAnnouncement(get(), "SERVER", message, param2, param3);
 }
 
-void WrappedTextPacket::createTranslatedAnnouncement(std::string const &param0, std::string const &param1, std::string const &param2, std::string const &param3) {
-    hook->o_TextPacket_createTranslatedAnnouncement(get(), param0, param1, param2, param3);
+void WrappedTextPacket::createTranslatedAnnouncement(std::string const &param1, std::string const &param2, std::string const &param3) {
+    hook->o_TextPacket_createTranslatedAnnouncement(get(), "SERVER", param1, param2, param3);
 }
 
 void WrappedTextPacket::createJukeboxPopup(std::string const &message, std::vector<std::string> const &params) {

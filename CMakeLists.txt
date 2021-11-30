@@ -15,7 +15,10 @@ set(CMAKE_BUILD_TYPE Debug)
 add_subdirectory(subhook)
 
 # Find source files
-file(GLOB SOURCES src/wrap/*.cpp src/hooks/*.cpp src/*.cpp)
+file(GLOB SOURCES src/wrap/*.cpp src/hooks/*.cpp src/json/*.cpp src/*.cpp)
+
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(JSONCPP jsoncpp)
 
 add_library(${PROJECT_NAME} SHARED ${SOURCES})
 
@@ -23,10 +26,14 @@ add_library(${PROJECT_NAME} SHARED ${SOURCES})
 include_directories(include)
 
 target_link_libraries(${PROJECT_NAME} subhook)
+link_libraries(${JSONCPP_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} ${JSONCPP_LIBRARIES})
 
 target_include_directories(${PROJECT_NAME} PRIVATE include)
 target_include_directories(${PROJECT_NAME} PRIVATE src)
 target_include_directories(${PROJECT_NAME} PRIVATE ELFIO)
+target_include_directories(${PROJECT_NAME} PRIVATE cppzmq)
+target_include_directories(${PROJECT_NAME} PRIVATE SafeQueue)
 
 set_target_properties(${PROJECT_NAME} PROPERTIES VERSION 1.0)
 set_target_properties(${PROJECT_NAME} PROPERTIES VERSION_MAJOR 1)

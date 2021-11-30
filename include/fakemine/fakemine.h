@@ -7,6 +7,8 @@
 #pragma once
 
 #include <memory>
+#include <functional>
+#include <vector>
 
 class LoopbackPacketSender;
 

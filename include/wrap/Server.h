@@ -5,6 +5,8 @@
 
 #include <fakemine/fakemine.h>
 #include <hook.h>
+#include <event/message.h>
+#include <event/playerlist.h>
 
 class WrappedServer {
     Hook *hook;
@@ -12,6 +14,10 @@ class WrappedServer {
 public:
     explicit WrappedServer(Hook *hook, void *serverNetworkHandler);
     void broadcastMessage(const std::string &sourceName, const std::string &message, bool needsTranslate = false);
+    void broadcastPacket(Packet *packet);
     bool sendMessageTo(const std::string &sourceName, const std::string &destinationName, const std::string &message, bool needsTranslate = false);
     bool sendPacketTo(const std::string &destinationName, Packet *packet);
+    void handleEvent(const std::shared_ptr<HockEvent>& event);
+    void handleMessageEvent(const MessageEvent *event);
+    void handlePlayerList(const PlayerListEvent *event);
 };

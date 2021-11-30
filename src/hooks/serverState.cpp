@@ -3,11 +3,12 @@
 //
 
 #include <iostream>
+#include "event.h"
 #include <chrono>
 #include <wrap/Server.h>
 #include "hook.h"
 
-auto lastSend = std::chrono::system_clock::now();
+#define MAX_QUEUE_PROC 16
 
 void *Hook::ServerNetworkHandler_onTick(void *thisObj) {
     static subhook::Hook *hook;
@@ -16,16 +17,14 @@ void *Hook::ServerNetworkHandler_onTick(void *thisObj) {
     }
     subhook::ScopedHookRemove remove(hook);
     WrappedServer server(singleton, thisObj);
-    auto delta = std::chrono::duration_cast<std::chrono::seconds>((std::chrono::system_clock::now() - lastSend));
 
-    if (delta.count() >= 5) {
-        server.broadcastMessage("The Server", "The Message");
-
-        for (auto const &p: singleton->playerToHash) {
-            server.sendMessageTo("Server", p.first, "Henlo "  + p.first);
+    auto event = std::make_shared<HockEvent>();
+    for (int i = 0; i < MAX_QUEUE_PROC; i++) {
+        if (ReadInputEvent(event)) {
+            server.handleEvent(event);
+        } else {
+            break;
         }
-
-        lastSend = std::chrono::system_clock::now();
     }
 
     return singleton->o_ServerNetworkHandler_onTick(thisObj);
