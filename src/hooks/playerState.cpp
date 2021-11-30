@@ -13,7 +13,7 @@ void *Hook::Level_onPlayerDeath(void *thisObj, void *player, void *actorDamageSo
         hook = singleton->getHook(__func__);
     }
     subhook::ScopedHookRemove remove(hook);
-    const char *username = ((char *) player) + 0x900;
+    const char *username = ((char *) player) + 0x8F8;
     std::cout << "Player " << username << " died" << std::endl;
 
     auto xuid = singleton->playerToXuid[username];
@@ -91,7 +91,7 @@ void *Hook::ServerNetworkHandler_onPlayerLeft(void *thisObj, void *serverPlayer,
     }
     subhook::ScopedHookRemove remove(hook);
 
-    const char *username = ((char *) serverPlayer) + 0x900;
+    const char *username = ((char *) serverPlayer) + 0x8F8;
     std::cout << "Player " << username << " left" << std::endl;
 
     auto xuid = singleton->playerToXuid[username];
