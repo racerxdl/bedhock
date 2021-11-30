@@ -30,3 +30,5 @@
 #define __fn_TextPacket_createWhisper "_ZN10TextPacket13createWhisperERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES7_S7_S7_"
 #define __fn_TextPacket_TextPacket "_ZN10TextPacketC1Ev"
 #define __fn_TextPacket_destructor "_ZN10TextPacketD1Ev"
+
+#define __fn_StartGamePacket_WriteBinaryStream "_ZNK15StartGamePacket5writeER12BinaryStream"

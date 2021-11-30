@@ -53,6 +53,7 @@ private:
     std::function<threeArgVoid> o_ServerNetworkHandler_onClientAuthenticated;
     std::function<threeArgVoid> o_ServerNetworkHandler_onPlayerLeft;
     std::function<oneArgVoid> o_ServerNetworkHandler_onTick;
+    std::function<twoArgVoid> o_StartGamePacket_writeBinaryStream;
 
     // Event Queues
     SafeQueue<std::shared_ptr<HockEvent>> input, output;
@@ -70,6 +71,9 @@ protected:
     static void *ServerNetworkHandler_onPlayerLeft(void *thisObj, void *serverPlayer, void *something);
 
     static void *ServerNetworkHandler_onTick(void *thisObj);
+
+    // Fixes
+    static void *StartGamePacket_write_BinaryStream(void *thisObj, void *binaryStream);
 
     ~Hook();
 

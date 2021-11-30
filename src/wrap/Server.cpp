@@ -99,6 +99,7 @@ void WrappedServer::handleMessageEvent(const MessageEvent *event) {
 }
 
 void WrappedServer::handlePlayerList(const PlayerListEvent *) {
+    std::cout << "Received request for player list" << std::endl;
     auto eventData = std::make_shared<PlayerListEvent>();
     eventData->players = hook->playerList();
     Hook::WriteOutputEvent(eventData);

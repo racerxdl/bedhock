@@ -36,6 +36,7 @@ void Hook::Init(const SymbolMap &sym) {
     HOOKFUNC(threeArgVoid, __fn_ServerNetworkHandler_onClientAuthenticated, o_ServerNetworkHandler_onClientAuthenticated, Hook::ServerNetworkHandler_onClientAuthenticated);
     HOOKFUNC(threeArgVoid, __fn_ServerNetworkHandler_onPlayerLeft, o_ServerNetworkHandler_onPlayerLeft, Hook::ServerNetworkHandler_onPlayerLeft);
     HOOKFUNC(oneArgVoid, __fn_ServerNetworkHandler_onTick, o_ServerNetworkHandler_onTick, Hook::ServerNetworkHandler_onTick);
+    HOOKFUNC(twoArgVoid, __fn_StartGamePacket_WriteBinaryStream, o_StartGamePacket_writeBinaryStream, Hook::StartGamePacket_write_BinaryStream);
 
     BIND(ulong(void * ), __fn_NetworkIdentifier_getHash, o_NetworkIdentifier_getHash);
     BIND(void (std::string&, void *), __fn_ExtendedCertificate_getIdentityName, o_ExtendedCertificate_getIdentityName);

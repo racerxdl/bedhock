@@ -4,6 +4,7 @@
 
 #include <iostream>
 #include <event/playerupdate.h>
+#include <cmath>
 #include "hook.h"
 
 void *Hook::Level_onPlayerDeath(void *thisObj, void *player, void *actorDamageSource) {
@@ -40,6 +41,17 @@ void *Hook::ServerNetworkHandler_handle_PlayerAuthInputPacket(void *thisObj, voi
     float Y = base[3];
     float Z = base[4];
     float headYaw = base[5];
+
+    // See fixes.cpp for why these checks are done here.
+    if (std::isnan(pitch)) {
+        base[0] = 0;
+    }
+    if (std::isnan(yaw)) {
+        base[1] = 0;
+    }
+    if (std::isnan(headYaw)) {
+        base[5] = 0;
+    }
 
     auto p = std::make_shared<PlayerUpdate>(username, xuid, pitch, yaw, X, Y, Z, headYaw);
     WriteOutputEvent(p);
