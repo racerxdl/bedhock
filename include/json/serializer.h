@@ -3,6 +3,9 @@
 //
 
 #pragma once
+
+#include <memory>
+#include <event/event.h>
 #include "serializable.h"
 
 class CJsonSerializer {
@@ -11,6 +14,7 @@ public:
 
     static bool Deserialize(IJsonSerializable *pObj, std::string &input);
 
+    static std::shared_ptr<HockEvent> DeserializeEvent(const std::string &input);
 private:
-    CJsonSerializer(void) {};
+    CJsonSerializer() = default;
 };

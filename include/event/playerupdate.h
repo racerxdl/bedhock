@@ -10,6 +10,7 @@
 
 class PlayerStatusEvent : public HockEvent {
 protected:
+    explicit PlayerStatusEvent(HockEventType type) : HockEvent(type) {}
     PlayerStatusEvent(HockEventType type, std::string username, std::string xuid) : HockEvent(type), username(std::move(username)), xuid(std::move(xuid)) {}
 
 public:
@@ -28,35 +29,39 @@ public:
     }
 };
 
-class PlayerJoin : public PlayerStatusEvent {
+class PlayerJoinEvent : public PlayerStatusEvent {
 public:
-    PlayerJoin(const std::string &username, const std::string &xuid) : PlayerStatusEvent(HockEventType::EVENT_PLAYER_JOIN, username, xuid) {}
+    PlayerJoinEvent() : PlayerStatusEvent(HockEventType::EVENT_PLAYER_JOIN) {}
+    PlayerJoinEvent(const std::string &username, const std::string &xuid) : PlayerStatusEvent(HockEventType::EVENT_PLAYER_JOIN, username, xuid) {}
 };
 
-class PlayerLeft : public PlayerStatusEvent {
+class PlayerLeftEvent : public PlayerStatusEvent {
 public:
-    PlayerLeft(const std::string &username, const std::string &xuid) : PlayerStatusEvent(HockEventType::EVENT_PLAYER_LEFT, username, xuid) {}
+    PlayerLeftEvent() : PlayerStatusEvent(HockEventType::EVENT_PLAYER_LEFT) {}
+    PlayerLeftEvent(const std::string &username, const std::string &xuid) : PlayerStatusEvent(HockEventType::EVENT_PLAYER_LEFT, username, xuid) {}
 };
 
 
-class PlayerDeath : public PlayerStatusEvent {
+class PlayerDeathEvent : public PlayerStatusEvent {
 public:
-    PlayerDeath(const std::string &username, const std::string &xuid) : PlayerStatusEvent(HockEventType::EVENT_PLAYER_DEATH, username, xuid) {}
+    PlayerDeathEvent() : PlayerStatusEvent(HockEventType::EVENT_PLAYER_DEATH) {}
+    PlayerDeathEvent(const std::string &username, const std::string &xuid) : PlayerStatusEvent(HockEventType::EVENT_PLAYER_DEATH, username, xuid) {}
 };
 
 class PlayerUpdate : public PlayerStatusEvent {
 public:
+    PlayerUpdate() : PlayerStatusEvent(HockEventType::EVENT_PLAYER_UPDATE) {}
     PlayerUpdate(const std::string &username, const std::string &xuid, float pitch, float yaw, float X, float Y, float Z, float headYaw) : PlayerStatusEvent(HockEventType::EVENT_PLAYER_UPDATE,
                                                                                                                                                              username, xuid),
                                                                                                                                            pitch(pitch), yaw(yaw),
                                                                                                                                            X(X), Y(Y), Z(Z), headYaw(headYaw) {}
 
-    float pitch;
-    float yaw;
-    float X;
-    float Y;
-    float Z;
-    float headYaw;
+    float pitch{};
+    float yaw{};
+    float X{};
+    float Y{};
+    float Z{};
+    float headYaw{};
 
     void Serialize(Json::Value &root) override {
         PlayerStatusEvent::Serialize(root);

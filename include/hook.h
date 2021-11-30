@@ -9,6 +9,7 @@
 #include <functional>
 #include <fakemine/fakemine.h>
 #include <event/event.h>
+#include <atomic>
 #include "symbolmap.h"
 #include "SafeQueue.hpp"
 
@@ -30,6 +31,8 @@ private:
     std::map<std::string, ulong> playerToHash;
     std::map<ulong, std::string> hashToPlayer;
     std::map<std::string, std::string> playerToXuid;
+
+    std::atomic<bool> stopped{};
 
     Hook();
 
@@ -94,6 +97,9 @@ public:
     std::function<void(void *, std::string const &, std::string const &, std::string const &, std::string const &)> o_TextPacket_createWhisper;
 
     std::vector<std::string> playerList();
+
+    static void StopAll();
+    static bool IsStopped() { return singleton->stopped; }
 
     // Event Queue Management
     static bool ReadInputEvent(std::shared_ptr<HockEvent> &event);

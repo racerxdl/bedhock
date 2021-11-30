@@ -2,9 +2,6 @@
 // Created by lucas on 28/11/2021.
 //
 
-#include <iostream>
-#include "event.h"
-#include <chrono>
 #include <wrap/Server.h>
 #include "hook.h"
 

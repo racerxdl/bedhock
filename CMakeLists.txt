@@ -15,10 +15,11 @@ set(CMAKE_BUILD_TYPE Debug)
 add_subdirectory(subhook)
 
 # Find source files
-file(GLOB SOURCES src/wrap/*.cpp src/hooks/*.cpp src/json/*.cpp src/*.cpp)
+file(GLOB SOURCES  src/*.cpp src/wrap/*.cpp src/hooks/*.cpp src/json/*.cpp)
 
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(JSONCPP jsoncpp)
+pkg_check_modules(LIBZMQ libzmq)
 
 add_library(${PROJECT_NAME} SHARED ${SOURCES})
 
@@ -27,7 +28,9 @@ include_directories(include)
 
 target_link_libraries(${PROJECT_NAME} subhook)
 link_libraries(${JSONCPP_LIBRARIES})
+link_libraries(${LIBZMQ_LIBRARIES})
 target_link_libraries(${PROJECT_NAME} ${JSONCPP_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} ${LIBZMQ_LIBRARIES})
 
 target_include_directories(${PROJECT_NAME} PRIVATE include)
 target_include_directories(${PROJECT_NAME} PRIVATE src)

@@ -16,7 +16,7 @@ void *Hook::Level_onPlayerDeath(void *thisObj, void *player, void *actorDamageSo
     std::cout << "Player " << username << " died" << std::endl;
 
     auto xuid = singleton->playerToXuid[username];
-    auto p = std::make_shared<PlayerDeath>(username, xuid);
+    auto p = std::make_shared<PlayerDeathEvent>(username, xuid);
     WriteOutputEvent(p);
 
     return singleton->o_Level_onPlayerDeath(thisObj, player, actorDamageSource);
@@ -66,7 +66,7 @@ void *Hook::ServerNetworkHandler_onClientAuthenticated(void *thisObj, void *netw
     singleton->playerToXuid[username] = xuid;
     singleton->hashToPlayer[hash] = username;
 
-    auto p = std::make_shared<PlayerJoin>(username, xuid);
+    auto p = std::make_shared<PlayerJoinEvent>(username, xuid);
     WriteOutputEvent(p);
 
     return singleton->o_ServerNetworkHandler_onClientAuthenticated(thisObj, networkIdentifier, certificate);
@@ -83,7 +83,7 @@ void *Hook::ServerNetworkHandler_onPlayerLeft(void *thisObj, void *serverPlayer,
     std::cout << "Player " << username << " left" << std::endl;
 
     auto xuid = singleton->playerToXuid[username];
-    auto p = std::make_shared<PlayerLeft>(username, xuid);
+    auto p = std::make_shared<PlayerLeftEvent>(username, xuid);
     WriteOutputEvent(p);
 
     try {

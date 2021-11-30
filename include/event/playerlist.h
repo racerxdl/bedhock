@@ -13,9 +13,9 @@ public:
 
     void Serialize(Json::Value &root) override {
         HockEvent::Serialize(root);
-        auto p = root["players"];
+        root["players"] = Json::Value(Json::arrayValue);
         for (int i = 0; i < players.size(); i++) {
-            p[i] = players[i];
+            root["players"][i] = players[i];
         }
     }
 

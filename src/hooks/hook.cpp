@@ -19,6 +19,7 @@ void Hook::InitSingleton(const SymbolMap &map) {
     std::cout << "Initializing hooks" << std::endl;
     singleton = new Hook();
     singleton->Init(map);
+    singleton->stopped = false;
 }
 
 Hook::~Hook() {
@@ -130,4 +131,10 @@ std::vector<std::string> Hook::playerList() {
         players.push_back(p.first);
     }
     return players;
+}
+
+void Hook::StopAll() {
+    singleton->input.Finish();
+    singleton->output.Finish();
+    singleton->stopped = true;
 }

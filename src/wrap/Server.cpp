@@ -50,10 +50,8 @@ void WrappedServer::broadcastPacket(Packet *packet) {
 void WrappedServer::handleEvent(const std::shared_ptr<HockEvent> &event) {
     HockEventType type = event->getType();
     switch (type) {
-        case HockEventType::EVENT_MESSAGE:
-            handleMessageEvent((MessageEvent *) event.get());
-        case HockEventType::EVENT_PLAYER_LIST:
-            handlePlayerList((PlayerListEvent *) event.get());
+        case HockEventType::EVENT_MESSAGE: handleMessageEvent((MessageEvent *) event.get());break;
+        case HockEventType::EVENT_PLAYER_LIST: handlePlayerList((PlayerListEvent *) event.get()); break;
         default:
             return;
     }
