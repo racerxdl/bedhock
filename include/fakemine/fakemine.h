@@ -117,3 +117,17 @@ public:
 class TextObjectRoot;
 
 class TextPacket;
+
+
+struct ChangeDimensionRequest {
+    uint32_t unk0;
+    uint32_t unk1;
+    uint32_t dimensionId;
+    float unk2;
+    float unk3;
+    float unk4;
+};
+
+typedef int LogCategory;
+typedef int LogRule;
+typedef int LogAreaID;

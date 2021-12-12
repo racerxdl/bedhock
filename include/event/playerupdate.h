@@ -48,6 +48,13 @@ public:
     PlayerDeathEvent(const std::string &username, const std::string &xuid) : PlayerStatusEvent(HockEventType::EVENT_PLAYER_DEATH, username, xuid) {}
 };
 
+class PlayerChangeDimensionEvent : public PlayerStatusEvent {
+public:
+    PlayerChangeDimensionEvent() : PlayerStatusEvent(HockEventType::EVENT_PLAYER_DIMENSION_CHANGE) {}
+    PlayerChangeDimensionEvent(const std::string &username, const std::string &xuid, int dimension) : PlayerStatusEvent(HockEventType::EVENT_PLAYER_DIMENSION_CHANGE, username, xuid), dimensionId(dimension) {}
+    int dimensionId;
+};
+
 class PlayerUpdate : public PlayerStatusEvent {
 public:
     PlayerUpdate() : PlayerStatusEvent(HockEventType::EVENT_PLAYER_UPDATE) {}

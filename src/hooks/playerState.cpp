@@ -7,12 +7,39 @@
 #include <cmath>
 #include "hook.h"
 
-void *Hook::Level_onPlayerDeath(void *thisObj, void *player, void *actorDamageSource) {
-    static subhook::Hook *hook;
+void *Hook::Level_playerChangeDimension(void *thisObj,  void *player, ChangeDimensionRequest *changeDimensionRequest) {
+    static std::shared_ptr<subhook::Hook> hook;
     if (hook == nullptr) {
         hook = singleton->getHook(__func__);
     }
-    subhook::ScopedHookRemove remove(hook);
+    subhook::ScopedHookRemove remove(hook.get());
+
+    auto dimensionId = changeDimensionRequest->dimensionId;
+    auto username = ((const char *) player) + 0x8F8;
+    std::string dimensionName;
+    auto xuid = singleton->playerToXuid[username];
+
+    switch (dimensionId) {
+        case 0: dimensionName = "overworld"; break;
+        case 1: dimensionName = "nether"; break;
+        case 2: dimensionName = "the end"; break;
+        default: dimensionName = "unknown";
+    }
+
+    std::cout << "Player " << username << " went to " << dimensionName << std::endl;
+
+    auto p = std::make_shared<PlayerChangeDimensionEvent>(username, xuid, dimensionId);
+    WriteOutputEvent(p);
+
+    return singleton->o_Level_playerChangeDimension(thisObj, player, changeDimensionRequest);
+}
+
+void *Hook::Level_onPlayerDeath(void *thisObj, void *player, void *actorDamageSource) {
+    static std::shared_ptr<subhook::Hook> hook;
+    if (hook == nullptr) {
+        hook = singleton->getHook(__func__);
+    }
+    subhook::ScopedHookRemove remove(hook.get());
     const char *username = ((char *) player) + 0x8F8;
     std::cout << "Player " << username << " died" << std::endl;
 
@@ -24,11 +51,11 @@ void *Hook::Level_onPlayerDeath(void *thisObj, void *player, void *actorDamageSo
 }
 
 void *Hook::ServerNetworkHandler_handle_PlayerAuthInputPacket(void *thisObj, void *networkIdentifier, void *playerAuthInputPacket) {
-    static subhook::Hook *hook;
+    static std::shared_ptr<subhook::Hook> hook;
     if (hook == nullptr) {
         hook = singleton->getHook(__func__);
     }
-    subhook::ScopedHookRemove remove(hook);
+    subhook::ScopedHookRemove remove(hook.get());
 
     auto base = (float *) ((char *) playerAuthInputPacket + 0x2C);
     auto hash = singleton->o_NetworkIdentifier_getHash(networkIdentifier);
@@ -60,11 +87,12 @@ void *Hook::ServerNetworkHandler_handle_PlayerAuthInputPacket(void *thisObj, voi
 }
 
 void *Hook::ServerNetworkHandler_onClientAuthenticated(void *thisObj, void *networkIdentifier, void *certificate) {
-    static subhook::Hook *hook;
+    static std::shared_ptr<subhook::Hook> hook;
     if (hook == nullptr) {
         hook = singleton->getHook(__func__);
     }
-    subhook::ScopedHookRemove remove(hook);
+    subhook::ScopedHookRemove remove(hook.get());
+
     auto hash = singleton->o_NetworkIdentifier_getHash(networkIdentifier);
     std::string username, xuid;
 
@@ -85,11 +113,11 @@ void *Hook::ServerNetworkHandler_onClientAuthenticated(void *thisObj, void *netw
 }
 
 void *Hook::ServerNetworkHandler_onPlayerLeft(void *thisObj, void *serverPlayer, void *something) {
-    static subhook::Hook *hook;
+    static std::shared_ptr<subhook::Hook> hook;
     if (hook == nullptr) {
         hook = singleton->getHook(__func__);
     }
-    subhook::ScopedHookRemove remove(hook);
+    subhook::ScopedHookRemove remove(hook.get());
 
     const char *username = ((char *) serverPlayer) + 0x8F8;
     std::cout << "Player " << username << " left" << std::endl;

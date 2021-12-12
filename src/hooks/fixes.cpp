@@ -7,11 +7,12 @@
 #include "hook.h"
 
 void *Hook::StartGamePacket_write_BinaryStream(void *thisObj, void *binaryStream) {
-    static subhook::Hook *hook;
+    static std::shared_ptr<subhook::Hook> hook;
     if (hook == nullptr) {
         hook = singleton->getHook(__func__);
     }
-    subhook::ScopedHookRemove remove(hook);
+    subhook::ScopedHookRemove remove(hook.get());
+
     // This fixes a memory-leak that can happen client-side when Pitch/Yaw are NaN
     // This seens to happen only with Android Version, when in specific scenarios
     // under water. But its pretty easy to simulate by using MCPE-Linux and just going

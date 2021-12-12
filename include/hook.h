@@ -25,8 +25,8 @@ class Hook {
 private:
     static Hook *singleton;
     SymbolMap symMap;
-    std::vector<subhook::Hook *> hooks;
-    std::map<std::string, subhook::Hook *> nameToHook;
+    std::vector<std::shared_ptr<subhook::Hook>> hooks;
+    std::map<std::string, std::shared_ptr<subhook::Hook>> nameToHook;
     std::map<ulong, NetworkIdentifier *> hashToNetworkIdentifier;
     std::map<std::string, ulong> playerToHash;
     std::map<ulong, std::string> hashToPlayer;
@@ -44,7 +44,7 @@ private:
     template<typename T>
     bool bind(const std::string &name, std::function<T> &hook);
 
-    subhook::Hook *getHook(const std::string &name);
+    std::shared_ptr<subhook::Hook> getHook(const std::string &name);
 
     // Original hooked functions
     std::function<threeArgVoid> o_ServerNetworkHandler_displayGameMessage;
@@ -54,6 +54,7 @@ private:
     std::function<threeArgVoid> o_ServerNetworkHandler_onPlayerLeft;
     std::function<oneArgVoid> o_ServerNetworkHandler_onTick;
     std::function<twoArgVoid> o_StartGamePacket_writeBinaryStream;
+    std::function<threeArgVoid> o_Level_playerChangeDimension;
 
     // Event Queues
     SafeQueue<std::shared_ptr<HockEvent>> input, output;
@@ -71,6 +72,10 @@ protected:
     static void *ServerNetworkHandler_onPlayerLeft(void *thisObj, void *serverPlayer, void *something);
 
     static void *ServerNetworkHandler_onTick(void *thisObj);
+
+    static void *Level_playerChangeDimension(void *thisObj,  void *player, ChangeDimensionRequest *changeDimensionRequest);
+
+    static void *bedLog(LogCategory category, int bitset,LogRule rules,LogAreaID area, unsigned int unk0, char *functionName,int functionLine, char *format,...);
 
     // Fixes
     static void *StartGamePacket_write_BinaryStream(void *thisObj, void *binaryStream);

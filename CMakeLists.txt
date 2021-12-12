@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.10)
 project(Bedhock)
 
 # specify the C++ standard
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(SUBHOOK_STATIC ON)
 set(BUILD_SHARED_LIBS ON)
@@ -15,7 +15,7 @@ set(CMAKE_BUILD_TYPE Debug)
 add_subdirectory(subhook)
 
 # Find source files
-file(GLOB SOURCES  src/*.cpp src/wrap/*.cpp src/hooks/*.cpp src/json/*.cpp)
+file(GLOB SOURCES  src/*.cpp src/hooks/*.cpp src/wrap/*.cpp src/json/*.cpp)
 
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(JSONCPP jsoncpp)

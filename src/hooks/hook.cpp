@@ -23,8 +23,8 @@ void Hook::InitSingleton(const SymbolMap &map) {
 }
 
 Hook::~Hook() {
-    for (auto h: this->hooks) {
-        delete (h);
+    for (const auto& h: this->hooks) {
+        h->Remove();
     }
 }
 
@@ -37,6 +37,7 @@ void Hook::Init(const SymbolMap &sym) {
     HOOKFUNC(threeArgVoid, __fn_ServerNetworkHandler_onPlayerLeft, o_ServerNetworkHandler_onPlayerLeft, Hook::ServerNetworkHandler_onPlayerLeft);
     HOOKFUNC(oneArgVoid, __fn_ServerNetworkHandler_onTick, o_ServerNetworkHandler_onTick, Hook::ServerNetworkHandler_onTick);
     HOOKFUNC(twoArgVoid, __fn_StartGamePacket_WriteBinaryStream, o_StartGamePacket_writeBinaryStream, Hook::StartGamePacket_write_BinaryStream);
+    HOOKFUNC(threeArgVoid, __fn_Level_playerChangeDimension, o_Level_playerChangeDimension, Hook::Level_playerChangeDimension);
 
     BIND(ulong(void * ), __fn_NetworkIdentifier_getHash, o_NetworkIdentifier_getHash);
     BIND(void (std::string&, void *), __fn_ExtendedCertificate_getIdentityName, o_ExtendedCertificate_getIdentityName);
@@ -53,9 +54,22 @@ void Hook::Init(const SymbolMap &sym) {
     BIND(void(void * , std::string const&, std::string const&, std::string const&, std::string const&), __fn_TextPacket_createTranslatedChat, o_TextPacket_createTranslatedChat);
     BIND(void(void * , std::string const&, std::vector<std::string> const&), __fn_TextPacket_createJukeboxPopup, o_TextPacket_createJukeboxPopup);
     BIND(void(void * , std::string const&, std::string const&, std::string const&, std::string const&), __fn_TextPacket_createWhisper, o_TextPacket_createWhisper);
+
+    // BedrockLog::log we hook but dont save the original one
+    auto logPtr = this->symMap.getFunction(__fn_BedrockLog_log);
+    if (logPtr != nullptr) {
+        auto h = std::make_shared<subhook::Hook>();
+        if (!h->Install((void *) logPtr, (void *) Hook::bedLog, subhook::HookFlag64BitOffset)) {
+            std::cerr << "Error hooking log function" << std::endl;
+        } else {
+            this->hooks.push_back(h);
+            this->nameToHook["bedLog"] = h;
+        }
+    }
+
 }
 
-subhook::Hook *Hook::getHook(const std::string &name) {
+std::shared_ptr<subhook::Hook> Hook::getHook(const std::string &name) {
     try {
         return this->nameToHook.at(name);
     } catch (const std::out_of_range &) {
@@ -77,10 +91,9 @@ bool Hook::hookFunc(const std::string &name, const std::string &hname, std::func
     auto ptr = this->symMap.getFunction(name);
     hookOrigFn = (T *) ptr;
     if (hookOrigFn != nullptr) {
-        auto h = new subhook::Hook();
+        auto h = std::make_shared<subhook::Hook>();
         if (!h->Install((void *) ptr, (void *) target, subhook::HookFlag64BitOffset)) {
             std::cerr << "Error hooking " << name << std::endl;
-            delete h;
             return false;
         }
         this->hooks.push_back(h);

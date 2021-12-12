@@ -8,11 +8,12 @@
 #define MAX_QUEUE_PROC 16
 
 void *Hook::ServerNetworkHandler_onTick(void *thisObj) {
-    static subhook::Hook *hook;
+    static std::shared_ptr<subhook::Hook> hook;
     if (hook == nullptr) {
         hook = singleton->getHook(__func__);
     }
-    subhook::ScopedHookRemove remove(hook);
+    subhook::ScopedHookRemove remove(hook.get());
+
     WrappedServer server(singleton, thisObj);
 
     auto event = std::make_shared<HockEvent>();

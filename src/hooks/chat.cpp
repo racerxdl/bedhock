@@ -6,11 +6,12 @@
 #include "hook.h"
 
 void *Hook::ServerNetworkHandler_displayGameMessage(void *thisObj, void *player, void *chatEvent) {
-    static subhook::Hook *hook;
+    static std::shared_ptr<subhook::Hook> hook;
     if (hook == nullptr) {
         hook = singleton->getHook(__func__);
     }
-    subhook::ScopedHookRemove remove(hook);
+    subhook::ScopedHookRemove remove(hook.get());
+
     const char *message = *((char **) chatEvent);
     const char *username = ((char *) chatEvent) + 0x68;
     WriteOutputEvent(std::make_shared<MessageEvent>(MessageType::NORMAL, username, message));

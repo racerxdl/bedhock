@@ -15,6 +15,8 @@ enum class HockEventType {
     EVENT_PLAYER_DEATH = 3,
     EVENT_PLAYER_UPDATE = 4,
     EVENT_PLAYER_LIST = 5,
+    EVENT_PLAYER_DIMENSION_CHANGE = 6,
+    EVENT_LOG = 7,
 };
 
 class HockEvent : public IJsonSerializable {
