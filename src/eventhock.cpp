@@ -28,8 +28,10 @@ void EventHockThread() {
         auto e = std::make_shared<HockEvent>();
         if (Hook::ReadOutputEvent(e)) {
             std::string j;
-            CJsonSerializer::Serialize(e.get(), j);
-            if (socket.handle() != nullptr) { // Only send when connected
+            auto ok = CJsonSerializer::Serialize(e.get(), j);
+            if (!ok) {
+                std::cerr << "Error serializing event" << std::endl;
+            } else if (socket.handle() != nullptr) { // Only send when connected
                 socket.send(zmq::buffer(j), zmq::send_flags::dontwait);
             }
         }

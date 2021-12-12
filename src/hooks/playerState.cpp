@@ -26,10 +26,9 @@ void *Hook::Level_playerChangeDimension(void *thisObj,  void *player, ChangeDime
         default: dimensionName = "unknown";
     }
 
-    std::cout << "Player " << username << " went to " << dimensionName << std::endl;
+    // std::cout << "Player " << username << " went to " << dimensionName << std::endl;
 
-    auto p = std::make_shared<PlayerChangeDimensionEvent>(username, xuid, dimensionId);
-    WriteOutputEvent(p);
+    WriteOutputEvent(std::make_shared<PlayerChangeDimensionEvent>(username, xuid, dimensionId));
 
     return singleton->o_Level_playerChangeDimension(thisObj, player, changeDimensionRequest);
 }

@@ -11,6 +11,7 @@
 class PlayerStatusEvent : public HockEvent {
 protected:
     explicit PlayerStatusEvent(HockEventType type) : HockEvent(type) {}
+
     PlayerStatusEvent(HockEventType type, std::string username, std::string xuid) : HockEvent(type), username(std::move(username)), xuid(std::move(xuid)) {}
 
 public:
@@ -32,12 +33,14 @@ public:
 class PlayerJoinEvent : public PlayerStatusEvent {
 public:
     PlayerJoinEvent() : PlayerStatusEvent(HockEventType::EVENT_PLAYER_JOIN) {}
+
     PlayerJoinEvent(const std::string &username, const std::string &xuid) : PlayerStatusEvent(HockEventType::EVENT_PLAYER_JOIN, username, xuid) {}
 };
 
 class PlayerLeftEvent : public PlayerStatusEvent {
 public:
     PlayerLeftEvent() : PlayerStatusEvent(HockEventType::EVENT_PLAYER_LEFT) {}
+
     PlayerLeftEvent(const std::string &username, const std::string &xuid) : PlayerStatusEvent(HockEventType::EVENT_PLAYER_LEFT, username, xuid) {}
 };
 
@@ -45,19 +48,34 @@ public:
 class PlayerDeathEvent : public PlayerStatusEvent {
 public:
     PlayerDeathEvent() : PlayerStatusEvent(HockEventType::EVENT_PLAYER_DEATH) {}
+
     PlayerDeathEvent(const std::string &username, const std::string &xuid) : PlayerStatusEvent(HockEventType::EVENT_PLAYER_DEATH, username, xuid) {}
 };
 
 class PlayerChangeDimensionEvent : public PlayerStatusEvent {
 public:
     PlayerChangeDimensionEvent() : PlayerStatusEvent(HockEventType::EVENT_PLAYER_DIMENSION_CHANGE) {}
-    PlayerChangeDimensionEvent(const std::string &username, const std::string &xuid, int dimension) : PlayerStatusEvent(HockEventType::EVENT_PLAYER_DIMENSION_CHANGE, username, xuid), dimensionId(dimension) {}
-    int dimensionId;
+
+    PlayerChangeDimensionEvent(const std::string &username, const std::string &xuid, int dimension) : PlayerStatusEvent(HockEventType::EVENT_PLAYER_DIMENSION_CHANGE, username, xuid),
+                                                                                                      dimensionId(dimension) {}
+
+    int dimensionId{};
+
+    void Serialize(Json::Value &root) override {
+        PlayerStatusEvent::Serialize(root);
+        root["dimension"] = dimensionId;
+    }
+
+    void Deserialize(Json::Value &root) override {
+        PlayerStatusEvent::Deserialize(root);
+        dimensionId = root.get("dimension", 0).asInt();
+    }
 };
 
 class PlayerUpdate : public PlayerStatusEvent {
 public:
     PlayerUpdate() : PlayerStatusEvent(HockEventType::EVENT_PLAYER_UPDATE) {}
+
     PlayerUpdate(const std::string &username, const std::string &xuid, float pitch, float yaw, float X, float Y, float Z, float headYaw) : PlayerStatusEvent(HockEventType::EVENT_PLAYER_UPDATE,
                                                                                                                                                              username, xuid),
                                                                                                                                            pitch(pitch), yaw(yaw),
