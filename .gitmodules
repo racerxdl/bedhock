@@ -10,3 +10,9 @@
 [submodule "SafeQueue"]
 	path = SafeQueue
 	url = https://github.com/K-Adam/SafeQueue.git
+[submodule "GSL"]
+	path = GSL
+	url = https://github.com/microsoft/GSL.git
+[submodule "fmt"]
+	path = fmt
+	url = https://github.com/fmtlib/fmt.git

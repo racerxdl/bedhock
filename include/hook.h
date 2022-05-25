@@ -10,6 +10,10 @@
 #include <fakemine/fakemine.h>
 #include <event/event.h>
 #include <atomic>
+#include <fmt/format.h>
+#include <fmt/color.h>
+
+#include "wrap/Player.h"
 #include "symbolmap.h"
 #include "SafeQueue.hpp"
 
@@ -27,7 +31,7 @@ private:
     SymbolMap symMap;
     std::vector<std::shared_ptr<subhook::Hook>> hooks;
     std::map<std::string, std::shared_ptr<subhook::Hook>> nameToHook;
-    std::map<ulong, NetworkIdentifier *> hashToNetworkIdentifier;
+    std::map<ulong, const NetworkIdentifier *> hashToNetworkIdentifier;
     std::map<std::string, ulong> playerToHash;
     std::map<ulong, std::string> hashToPlayer;
     std::map<std::string, std::string> playerToXuid;
@@ -48,6 +52,7 @@ private:
 
     // Original hooked functions
     std::function<threeArgVoid> o_ServerNetworkHandler_displayGameMessage;
+    std::function<threeArgVoid> o_ServerNetworkHandler_handle_ModalFormResponsePacket;
     std::function<threeArgVoid> o_Level_onPlayerDeath;
     std::function<threeArgVoid> o_ServerNetworkHandler_handle_PlayerAuthInputPacket;
     std::function<threeArgVoid> o_ServerNetworkHandler_onClientAuthenticated;
@@ -63,17 +68,19 @@ protected:
     // Hook Callbacks
     static void *ServerNetworkHandler_displayGameMessage(void *thisObj, void *player, void *chatEvent);
 
-    static void *Level_onPlayerDeath(void *thisObj, void *player, void *actorDamageSource);
+    static void *Level_onPlayerDeath(void *thisObj, Player *player, ActorDamageSource *actorDamageSource);
 
-    static void *ServerNetworkHandler_handle_PlayerAuthInputPacket(void *thisObj, void *networkIdentifier, void *playerAuthInputPacket);
+    static void *ServerNetworkHandler_handle_PlayerAuthInputPacket(void *thisObj, NetworkIdentifier *networkIdentifier, void *playerAuthInputPacket);
 
-    static void *ServerNetworkHandler_onClientAuthenticated(void *thisObj, void *networkIdentifier, void *certificate);
+    static void *ServerNetworkHandler_handle_ModalFormResponsePacket(void *thisObj, NetworkIdentifier *networkIdentifier, ModalFormResponsePacket *modalFormResponsePacket);
 
-    static void *ServerNetworkHandler_onPlayerLeft(void *thisObj, void *serverPlayer, void *something);
+    static void *ServerNetworkHandler_onClientAuthenticated(void *thisObj, const NetworkIdentifier &networkIdentifier, const Certificate &certificate);
+
+    static void *ServerNetworkHandler_onPlayerLeft(void *thisObj, ServerPlayer *serverPlayer, void *something);
 
     static void *ServerNetworkHandler_onTick(void *thisObj);
 
-    static void *Level_playerChangeDimension(void *thisObj,  void *player, ChangeDimensionRequest *changeDimensionRequest);
+    static void *Level_playerChangeDimension(void *thisObj,  Player *player, ChangeDimensionRequest *changeDimensionRequest);
 
     static void *bedLog(LogCategory category, int bitset,LogRule rules,LogAreaID area, unsigned int unk0, char *functionName,int functionLine, char *format,...);
 
@@ -83,27 +90,12 @@ protected:
     ~Hook();
 
 public:
+
     static void InitSingleton(const SymbolMap &map);
 
     static void *getFunctionPointer(const std::string &name);
 
-    NetworkIdentifier *getPlayerNetworkIdentifier(const std::string &name);
-
-    // Bind only functions
-    std::function<ulong(void *)> o_NetworkIdentifier_getHash;
-    std::function<void(std::string &, void *)> o_ExtendedCertificate_getIdentityName;
-    std::function<void(std::string &, void *)> o_ExtendedCertificate_getXuid;
-    std::function<void(void *)> o_TextPacket_TextPacket;
-    std::function<void(void *)> o_TextPacket_destructor;
-    std::function<void(void *, std::string, std::string, std::string, std::string)> o_TextPacket_createChat;
-    std::function<void(void *, std::string const &, std::string const &, std::string const &, std::string const &)> o_TextPacket_createTranslatedAnnouncement;
-    std::function<void(void *, std::string)> o_TextPacket_createRaw;
-    std::function<void(void *, std::string, std::vector<std::string>)> o_TextPacket_createTranslated;
-    std::function<void(void *, std::string)> o_TextPacket_createSystemMessage;
-    std::function<void(void *, std::string const &, std::string const &, std::string const &, std::string const &)> o_TextPacket_createAnnouncement;
-    std::function<void(void *, std::string const &, std::string const &, std::string const &, std::string const &)> o_TextPacket_createTranslatedChat;
-    std::function<void(void *, std::string const &, std::vector<std::string> const &)> o_TextPacket_createJukeboxPopup;
-    std::function<void(void *, std::string const &, std::string const &, std::string const &, std::string const &)> o_TextPacket_createWhisper;
+    const NetworkIdentifier *getPlayerNetworkIdentifier(const std::string &name);
 
     std::vector<std::string> playerList();
 
@@ -118,4 +110,5 @@ public:
     static void WriteInputEvent(std::shared_ptr<HockEvent> event);
 
     static void WriteOutputEvent(std::shared_ptr<HockEvent> event);
+
 };

@@ -17,17 +17,19 @@ enum class HockEventType {
     EVENT_PLAYER_LIST = 5,
     EVENT_PLAYER_DIMENSION_CHANGE = 6,
     EVENT_LOG = 7,
+    EVENT_FORM_REQUEST = 8,
+    EVENT_FORM_RESPONSE = 9,
 };
 
 class HockEvent : public IJsonSerializable {
-private:
+   private:
     int type;
-protected:
 
-public:
+   protected:
+   public:
     explicit HockEvent() : HockEvent(HockEventType::EVENT_INVALID) {}
 
-    explicit HockEvent(HockEventType type) : type((int) type) {}
+    explicit HockEvent(HockEventType type) : type((int)type) {}
 
     [[nodiscard]] HockEventType getType() const { return (HockEventType)type; }
 
@@ -36,6 +38,6 @@ public:
     }
 
     void Deserialize(Json::Value &root) override {
-        type = root.get("type", (int) HockEventType::EVENT_INVALID).asInt();
+        type = root.get("type", (int)HockEventType::EVENT_INVALID).asInt();
     }
 };

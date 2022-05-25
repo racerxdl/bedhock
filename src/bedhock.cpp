@@ -1,10 +1,13 @@
+#include <fmt/format.h>
+
 #include <iostream>
 #include <string>
 #include <thread>
+#include <log.h>
 
-#include "tools.h"
-#include "symbolmap.h"
 #include "hook.h"
+#include "symbolmap.h"
+#include "tools.h"
 
 void EventHockThread();
 
@@ -13,21 +16,21 @@ static struct init {
 
     init() {
         std::string execName = currentExecutableName();
-        std::cout << "Executable: " << execName << std::endl;
-        SymbolMap symMap(execName);
+        Log::Info("Executable: {}\n", execName);
+        SymbolMap symMap;
+        symMap.Load();
         Hook::InitSingleton(symMap);
 
         eventHockThread = new std::thread(EventHockThread);
-
-        std::cout << "Bedhock Initialization done" << std::endl;
+        Log::Info("Bedhock Initialization done\n");
     }
 
     ~init() {
-        std::cout << "Cleaning up" << std::endl;
+        Log::Info("Cleaning up\n");
         Hook::StopAll();
-        std::cout << "Waiting eventhock thread to stop" << std::endl;
+        Log::Info("Waiting eventhock thread to stop\n");
         eventHockThread->join();
         delete eventHockThread;
-        std::cout << "Ended cleaning up" << std::endl;
+        Log::Info("Ended cleaning up\n");
     }
 } cpp_bedhook_init;

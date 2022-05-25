@@ -9,25 +9,34 @@
 #include <memory>
 #include <functional>
 #include <vector>
+#include <bitset>
 
-class LoopbackPacketSender;
+#include "base.h"
+#include "TextPacket.h"
+#include "serverPlayer.h"
+#include "SynchedActorData.h"
+#include "Dimension.h"
+#include "ActorDamageSource.h"
+#include "ExtendedCertificate.h"
+#include "NetworkIdentifier.h"
+#include "packets.h"
+#include "binaryStream.h"
+#include "ModalFormRequestPacket.h"
+#include "ModalFormResponsePacket.h"
 
 struct ServerNetworkHandler {
-    void **onPlayerReadyCallback;
-    void *unk0[5];
+    void *unk0[8];
     struct GameCallbacks *gameCallbacks;
-    long **unk1;
-    long unk2;
+    void *nonOwnerPointer;
+    void *unk1;
     struct NetworkHandler *networkHandler;
     struct PrivateKeyManager *privateKeyManager;
     struct ServerLocator *serverLocator;
     LoopbackPacketSender *packetSender;
-    char pad0[8];
+    void *unk2;
     struct AllowList *allowList;
     struct PermissionsFile *permissionsFile;
-    char pad1[4][16];
-    bool unk3;
-    char pad2[183];
+    void *unk3[30];
     struct MinecraftCommands *minecraftCommands;
     struct Scheduler *scheduler;
     long unk4;
@@ -36,43 +45,12 @@ struct ServerNetworkHandler {
     void *pad4[14];
     struct ServerNetworkController *serverNetworkController;
     void *pad5[42];
+
+    ServerPlayer * _getServerPlayer(NetworkIdentifier const &, unsigned char);
+
+
 };
 
-struct ServerNetworkController {};
-struct GameCallbacks {};
-struct Scheduler {};
-struct PrivateKeyManager {};
-struct MinecraftCommands {};
-struct ActiveTransfersManager {};
-struct ClassroomModeNetworkHandler {};
-struct BinaryStream {};
-struct ReadOnlyBinaryStream {};
-struct NetworkIdentifier {};
-struct NetEventCallback {};
-
-#pragma pack(push, 4)
-
-struct Packet {
-    // vtable added by compiler
-    int unk_4 = 2, unk_8 = 1;
-    char pad[0x8];
-    uintptr_t **handlerThunk;
-    char pad2[0x4];
-
-    virtual ~Packet() = 0;
-
-    virtual int getId() const = 0;
-
-    virtual std::string getName() const = 0;
-
-    virtual void write(BinaryStream &) const = 0;
-
-    virtual void read(ReadOnlyBinaryStream &) = 0;
-
-    virtual void handle(NetworkIdentifier const &, NetEventCallback &, std::shared_ptr<Packet> &) = 0;
-};
-
-#pragma pack(pop)
 
 class PacketSender {
 public:
@@ -116,18 +94,34 @@ public:
 
 class TextObjectRoot;
 
-class TextPacket;
-
 
 struct ChangeDimensionRequest {
-    uint32_t unk0;
-    uint32_t unk1;
-    uint32_t dimensionId;
-    float unk2;
-    float unk3;
-    float unk4;
+    int State;
+    AutomaticID<Dimension, int> FromDimensionId;
+    AutomaticID<Dimension, int> ToDimensionId;
+    float posX;
+    float posY;
+    float posZ;
+    bool UsePortal;
+    bool Respawn;
+    int AgentTag;
 };
 
 typedef int LogCategory;
 typedef int LogRule;
-typedef int LogAreaID;
+// typedef int LogAreaID;
+
+
+enum LogAreaID {
+    Default,
+};
+class BedrockLog {
+    public:
+    enum LogCategory {
+        DefaultL,
+    };
+    enum LogRule {
+        DefaultR,
+    };
+    static void log(BedrockLog::LogCategory, std::bitset<3ul>, BedrockLog::LogRule, LogAreaID, unsigned int, char const*functionName, int functionLine, char const*format , ...);
+};

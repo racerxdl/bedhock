@@ -1,8 +1,11 @@
 //
 // Created by lucas on 28/11/2021.
 //
-#include <iostream>
 #include <event/message.h>
+#include <fmt/format.h>
+
+#include <iostream>
+
 #include "hook.h"
 
 void *Hook::ServerNetworkHandler_displayGameMessage(void *thisObj, void *player, void *chatEvent) {
@@ -12,11 +15,11 @@ void *Hook::ServerNetworkHandler_displayGameMessage(void *thisObj, void *player,
     }
     subhook::ScopedHookRemove remove(hook.get());
 
-    const char *message = *((char **) chatEvent);
-    const char *username = ((char *) chatEvent) + 0x68;
+    const char *message = *((char **)chatEvent);
+    const char *username = ((char *)chatEvent) + 0x68;
     WriteOutputEvent(std::make_shared<MessageEvent>(MessageType::NORMAL, username, message));
 
-    std::cout << "<" << username << ">: " << message << std::endl;
+    fmt::print("{}: {}\n", username, message);
 
     return singleton->o_ServerNetworkHandler_displayGameMessage(thisObj, player, chatEvent);
 }

@@ -4,6 +4,7 @@
 
 #include <cmath>
 #include <iostream>
+#include <fmt/format.h>
 #include "hook.h"
 
 void *Hook::StartGamePacket_write_BinaryStream(void *thisObj, void *binaryStream) {
@@ -24,7 +25,7 @@ void *Hook::StartGamePacket_write_BinaryStream(void *thisObj, void *binaryStream
     auto base = (float*)(((char *)thisObj) + 1308);
     for (int i = 0; i < 5; i++) {
         if (std::isnan(base[i])) {
-            std::cerr << "Fixing bug for client. Float " << i << " was nan. " << std::endl;
+            fmt::print("Fixing bug for client. Float {} was NaN. ", i);
             base[i] = 0;
         }
     }

@@ -2,14 +2,20 @@
 // Created by lucas on 12/12/2021.
 //
 
+#include <event/log.h>
+#include <fmt/format.h>
+#include <fmt/color.h>
 #include <hook.h>
+#include <log.h>
+
 #include <cstdarg>
 #include <iostream>
-#include <event/log.h>
 
 #define BUFF_SIZE 1024
 
-void *Hook::bedLog(LogCategory category, int bitset,LogRule rules,LogAreaID area, unsigned int unk0, char *functionName,int functionLine, char *format,...) {
+bool Log::debugEnable = false;
+
+void *Hook::bedLog(LogCategory category, int bitset, LogRule rules, LogAreaID area, unsigned int unk0, char *functionName, int functionLine, char *format, ...) {
     va_list args;
     char buffer[BUFF_SIZE];
 
@@ -19,9 +25,11 @@ void *Hook::bedLog(LogCategory category, int bitset,LogRule rules,LogAreaID area
 
     auto data = std::string(buffer);
     auto func = std::string(functionName);
+    if (data[data.length()-1] == '\n') {
+        data = data.substr(0, data.length()-1);
+    }
 
     WriteOutputEvent(std::make_shared<LogEvent>((int)category, bitset, (int)rules, (int)area, unk0, func, functionLine, data));
-    std::cout << "(SERVER)[" << func << "+" << functionLine << "] " << data << std::endl;
-
+    Log::Bedlog("[SERVER] {}\n", data);
     return nullptr;
 }

@@ -2,40 +2,74 @@
 // Created by lucas on 29/11/2021.
 //
 
-#include <iostream>
-#include <wrap/TextPacket.h>
+#include <fakemine/TextPacket.h>
+#include <fmt/format.h>
+#include <log.h>
 #include <wrap/Server.h>
+#include <wrap/TextPacket.h>
 
+#include <iostream>
 
 WrappedServer::WrappedServer(Hook *hook, void *serverNetworkHandler) {
     this->hook = hook;
-    this->handler = (ServerNetworkHandler *) serverNetworkHandler;
+    this->handler = (ServerNetworkHandler *)serverNetworkHandler;
 }
 
 void WrappedServer::broadcastMessage(const std::string &sourceName, const std::string &message, bool needsTranslate) {
-    WrappedTextPacket packet(hook);
-    if (needsTranslate) {
-        packet.createTranslatedChat(sourceName, message);
-    } else {
-        packet.createChat(sourceName, message);
-    }
-    handler->packetSender->sendBroadcast(packet.get());
+    TextPacket packet =
+        (needsTranslate) ? TextPacket::createTranslatedChat(sourceName, message) : TextPacket::createChat(sourceName, message);
+    fmt::print("Sending message {} to everyone\n", message);
+    handler->packetSender->sendBroadcast(&packet);
 }
 
 bool WrappedServer::sendMessageTo(const std::string &sourceName, const std::string &destinationName, const std::string &message, bool needsTranslate) {
-    WrappedTextPacket packet(hook);
-    if (needsTranslate) {
-        packet.createTranslatedChat(sourceName, message);
-    } else {
-        packet.createChat(sourceName, message);
+    TextPacket packet =
+        (needsTranslate) ? TextPacket::createTranslatedChat(sourceName, message) : TextPacket::createChat(sourceName, message);
+    fmt::print("Sending message {} to {}\n", message, destinationName);
+    return sendPacketTo(destinationName, &packet);
+}
+
+void WrappedServer::sendFormTo(const std::string &destinationName, unsigned int formId, const std::string &data) {
+    auto pkt = MinecraftPackets::createPacket(MinecraftPacketIds::ModalFormRequest);
+    auto mfr = (ModalFormRequestPacket *)pkt.get();
+    mfr->formId = formId;
+    mfr->jsonData = data;
+
+    sendPacketTo(destinationName, pkt.get());
+}
+
+void WrappedServer::sendForm(unsigned int formId, const std::string &data) {
+    auto pkt = MinecraftPackets::createPacket(MinecraftPacketIds::ModalFormRequest);
+    auto mfr = (ModalFormRequestPacket *)pkt.get();
+    mfr->formId = formId;
+    mfr->jsonData = data;
+
+    broadcastPacket(pkt.get());
+}
+
+void WrappedServer::sendTestTo(const std::string &destinationName) {
+    auto identifier = hook->getPlayerNetworkIdentifier(destinationName);
+    if (identifier == nullptr) {
+        Log::Error("No such player {}\n", destinationName);
+        return;
+    }
+    auto player = getServerPlayer(*identifier);
+    if (player == nullptr) {
+        Log::Error("No such server player {}\n", destinationName);
+        return;
     }
 
-    return sendPacketTo(destinationName, packet.get());
+    std::cout << "SENT" << std::endl;
+    auto pkt = TextPacket::createSystemMessage("SENT FORM");
+    player->sendNetworkPacket(pkt);
 }
 
 bool WrappedServer::sendPacketTo(const std::string &destinationName, Packet *packet) {
     auto identifier = hook->getPlayerNetworkIdentifier(destinationName);
     if (identifier == nullptr) {
+        return false;
+    }
+    if (packet == nullptr) {
         return false;
     }
 
@@ -50,56 +84,43 @@ void WrappedServer::broadcastPacket(Packet *packet) {
 void WrappedServer::handleEvent(const std::shared_ptr<HockEvent> &event) {
     HockEventType type = event->getType();
     switch (type) {
-        case HockEventType::EVENT_MESSAGE: handleMessageEvent((MessageEvent *) event.get());break;
-        case HockEventType::EVENT_PLAYER_LIST: handlePlayerList((PlayerListEvent *) event.get()); break;
+        case HockEventType::EVENT_MESSAGE:
+            handleMessageEvent((MessageEvent *)event.get());
+            break;
+        case HockEventType::EVENT_PLAYER_LIST:
+            handlePlayerList((PlayerListEvent *)event.get());
+            break;
+        case HockEventType::EVENT_FORM_REQUEST:
+            handleFormRequest((FormRequestEvent *)event.get());
+            break;
         default:
+            fmt::print("Received unknown event {}\n", (int)type);
             return;
     }
 }
 
-void WrappedServer::handleMessageEvent(const MessageEvent *event) {
-    WrappedTextPacket packet(hook);
-
-    switch ((MessageType) event->msgType) {
-        case MessageType::NORMAL:
-            if (event->translatable) {
-                packet.createTranslatedChat(event->from, event->message);
-            } else {
-                packet.createChat(event->from, event->message);
-            }
-            break;
-        case MessageType::ANOUNCE:
-            if (event->translatable) {
-                packet.createTranslatedAnnouncement(event->message);
-            } else {
-                packet.createAnnouncement(event->message);
-            }
-            break;
-        case MessageType::WHISPER:
-            packet.createWhisper(event->from, event->message);
-            break;
-        case MessageType::SYSTEM:
-            packet.createSystemMessage(event->message);
-            break;
-        case MessageType::JUKEBOX:
-            packet.createJukeboxPopup(event->message);
-            break;
-        default:
-            std::cerr << "Unexpected message type: " << event->msgType << std::endl;
-            return;
-    }
+void WrappedServer::handleFormRequest(const FormRequestEvent *event) {
     if (event->isDirected()) {
-        if (!sendPacketTo(event->to, packet.get())) {
-            std::cerr << "Cannot send message to player " << event->to << std::endl;
+        sendFormTo(event->to, event->formId, event->jsonData);
+        return;
+    }
+
+    sendForm(event->formId, event->jsonData);
+}
+
+void WrappedServer::handleMessageEvent(const MessageEvent *event) {
+    TextPacket packet = TextPacket::createFromEvent(event);
+    if (event->isDirected()) {
+        if (!sendPacketTo(event->to, &packet)) {
+            fmt::print("Cannot send message to player {}\n", event->to);
         }
         return;
     }
 
-    broadcastPacket(packet.get());
+    broadcastPacket(&packet);
 }
 
 void WrappedServer::handlePlayerList(const PlayerListEvent *) {
-    std::cout << "Received request for player list" << std::endl;
     auto eventData = std::make_shared<PlayerListEvent>();
     eventData->players = hook->playerList();
     Hook::WriteOutputEvent(eventData);

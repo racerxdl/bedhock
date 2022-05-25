@@ -3,21 +3,32 @@
 //
 #pragma once
 
-#include <fakemine/fakemine.h>
-#include <hook.h>
+#include <event/form.h>
 #include <event/message.h>
 #include <event/playerlist.h>
+#include <fakemine/fakemine.h>
+#include <hook.h>
 
 class WrappedServer {
+   private:
     Hook *hook;
     ServerNetworkHandler *handler;
-public:
+    void handleMessageEvent(const MessageEvent *event);
+    void handlePlayerList(const PlayerListEvent *event);
+    void handleFormRequest(const FormRequestEvent *event);
+
+   public:
+    inline WrappedPlayer getServerPlayer(NetworkIdentifier const &id) {
+        return std::make_shared<_WrappedPlayer>(&id, handler, (Player *)handler->_getServerPlayer(id, 0));
+    }
     explicit WrappedServer(Hook *hook, void *serverNetworkHandler);
+    void handleEvent(const std::shared_ptr<HockEvent> &event);
+
     void broadcastMessage(const std::string &sourceName, const std::string &message, bool needsTranslate = false);
     void broadcastPacket(Packet *packet);
     bool sendMessageTo(const std::string &sourceName, const std::string &destinationName, const std::string &message, bool needsTranslate = false);
     bool sendPacketTo(const std::string &destinationName, Packet *packet);
-    void handleEvent(const std::shared_ptr<HockEvent>& event);
-    void handleMessageEvent(const MessageEvent *event);
-    void handlePlayerList(const PlayerListEvent *event);
+    void sendFormTo(const std::string &destinationName, unsigned int formId, const std::string &data);
+    void sendForm(unsigned int formId, const std::string &data);
+    void sendTestTo(const std::string &destinationName);
 };
