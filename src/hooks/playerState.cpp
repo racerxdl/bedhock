@@ -55,7 +55,7 @@ void *Hook::Level_playerChangeDimension(void *thisObj, Player *player, ChangeDim
             toDimensionName = "unknown";
     }
     if (changeDimensionRequest->State == 0) {
-        fmt::print("Player {} went from {} to {}\n", username, fromDimensionName, toDimensionName);
+        Log::Info("Player {} went from {} to {}\n", username, fromDimensionName, toDimensionName);
         WriteOutputEvent(std::make_shared<PlayerChangeDimensionEvent>(username, xuid, fromDimensionId, toDimensionId));
     }
     return singleton->o_Level_playerChangeDimension(thisObj, player, changeDimensionRequest);
@@ -69,7 +69,7 @@ void *Hook::Level_onPlayerDeath(void *thisObj, Player *player, ActorDamageSource
     subhook::ScopedHookRemove remove(hook.get());
     auto username = player->getName();
     auto cause = ActorDamageSource::lookupCauseName(actorDamageSource->getCause());
-    fmt::print("Player {} died by {}\n", username, cause);
+    Log::Info("Player {} died by {}\n", username, cause);
 
     auto xuid = singleton->playerToXuid[username];
     auto p = std::make_shared<PlayerDeathEvent>(username, xuid, cause);
@@ -125,7 +125,7 @@ void *Hook::ServerNetworkHandler_onClientAuthenticated(void *thisObj, const Netw
     auto username = ExtendedCertificate::getIdentityName(certificate);
     auto xuid = ExtendedCertificate::getXuid(certificate);
 
-    fmt::print("User {} ({}) logged in", username, xuid);
+    Log::Info("User {} ({}) logged in\n", username, xuid);
 
     singleton->hashToNetworkIdentifier[hash] = &networkIdentifier;
     singleton->playerToHash[username] = hash;
@@ -146,7 +146,7 @@ void *Hook::ServerNetworkHandler_onPlayerLeft(void *thisObj, ServerPlayer *serve
     subhook::ScopedHookRemove remove(hook.get());
     auto username = serverPlayer->getName();
     auto xuid = singleton->playerToXuid[username];
-    fmt::print("Player {} ({}) left.", username, xuid);
+    Log::Info("Player {} ({}) left.\n", username, xuid);
     auto p = std::make_shared<PlayerLeftEvent>(username, xuid);
     WriteOutputEvent(p);
 

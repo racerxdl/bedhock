@@ -8,18 +8,21 @@
 
 #include "hook.h"
 
-void *Hook::ServerNetworkHandler_displayGameMessage(void *thisObj, void *player, void *chatEvent) {
+void *Hook::ServerNetworkHandler_displayGameMessage(void *thisObj, void *_player, void *_chatEvent) {
     static std::shared_ptr<subhook::Hook> hook;
     if (hook == nullptr) {
         hook = singleton->getHook(__func__);
     }
     subhook::ScopedHookRemove remove(hook.get());
+    Player *player = (Player *) _player;
+    ChatEvent *chatEvent = (ChatEvent *) _chatEvent;
 
-    const char *message = *((char **)chatEvent);
-    const char *username = ((char *)chatEvent) + 0x68;
+    auto message = chatEvent->message;
+    auto username = player->getName();
+
     WriteOutputEvent(std::make_shared<MessageEvent>(MessageType::NORMAL, username, message));
 
-    fmt::print("{}: {}\n", username, message);
+    Log::Info("[CHAT] {}: {}\n", username, message);
 
     return singleton->o_ServerNetworkHandler_displayGameMessage(thisObj, player, chatEvent);
 }

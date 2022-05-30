@@ -25,7 +25,7 @@ void *Hook::StartGamePacket_write_BinaryStream(void *thisObj, void *binaryStream
     auto base = (float*)(((char *)thisObj) + 1308);
     for (int i = 0; i < 5; i++) {
         if (std::isnan(base[i])) {
-            fmt::print("Fixing bug for client. Float {} was NaN. ", i);
+            Log::Info("Fixing bug for client. Float {} was NaN. ", i);
             base[i] = 0;
         }
     }

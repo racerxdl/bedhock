@@ -13,6 +13,10 @@ class Log {
     static void Info(const std::string fmtString, const Args&... args) {
         fmt::print(fg(fmt::color::aqua), fmtString, args...);
     }
+    template <typename... Args>
+    static void Chat(const std::string fmtString, const Args&... args) {
+        fmt::print(fg(fmt::color::brown), fmtString, args...);
+    }
 
     template <typename... Args>
     static void Error(const std::string fmtString, const Args&... args) {
@@ -33,7 +37,7 @@ class Log {
 
     template <typename... Args>
     static void Bedlog(const std::string fmtString, const Args&... args) {
-        fmt::print(fg(fmt::color::aqua), fmtString, args...);
+        fmt::print(fg(fmt::color::gray), fmtString, args...);
     }
 };
 

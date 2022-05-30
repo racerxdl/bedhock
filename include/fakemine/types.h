@@ -40,6 +40,7 @@ class Container;
 class CompoundTag;
 class LoopbackPacketSender;
 class Actor;
+class Objective;
 
 struct ServerNetworkController {};
 struct GameCallbacks {};
@@ -53,6 +54,11 @@ struct ReadOnlyBinaryStream;
 class NetworkIdentifier;
 struct NetEventCallback {};
 struct NetworkHandler {};
+
+enum class ObjectiveSortOrder : uint8_t {
+    Ascending = 0,
+    Descending = 1
+};
 
 class ClientBlobCache {
    public:

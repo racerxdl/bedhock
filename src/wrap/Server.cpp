@@ -18,14 +18,14 @@ WrappedServer::WrappedServer(Hook *hook, void *serverNetworkHandler) {
 void WrappedServer::broadcastMessage(const std::string &sourceName, const std::string &message, bool needsTranslate) {
     TextPacket packet =
         (needsTranslate) ? TextPacket::createTranslatedChat(sourceName, message) : TextPacket::createChat(sourceName, message);
-    fmt::print("Sending message {} to everyone\n", message);
+    Log::Debug("Sending message {} to everyone\n", message);
     handler->packetSender->sendBroadcast(&packet);
 }
 
 bool WrappedServer::sendMessageTo(const std::string &sourceName, const std::string &destinationName, const std::string &message, bool needsTranslate) {
     TextPacket packet =
         (needsTranslate) ? TextPacket::createTranslatedChat(sourceName, message) : TextPacket::createChat(sourceName, message);
-    fmt::print("Sending message {} to {}\n", message, destinationName);
+    Log::Debug("Sending message {} to {}\n", message, destinationName);
     return sendPacketTo(destinationName, &packet);
 }
 
@@ -59,9 +59,9 @@ void WrappedServer::sendTestTo(const std::string &destinationName) {
         return;
     }
 
-    std::cout << "SENT" << std::endl;
-    auto pkt = TextPacket::createSystemMessage("SENT FORM");
-    player->sendNetworkPacket(pkt);
+    // std::cout << "SENT" << std::endl;
+    // auto pkt = TextPacket::createSystemMessage("SENT FORM");
+    // player->sendNetworkPacket(pkt);
 }
 
 bool WrappedServer::sendPacketTo(const std::string &destinationName, Packet *packet) {
@@ -93,6 +93,9 @@ void WrappedServer::handleEvent(const std::shared_ptr<HockEvent> &event) {
         case HockEventType::EVENT_FORM_REQUEST:
             handleFormRequest((FormRequestEvent *)event.get());
             break;
+        case HockEventType::EVENT_SCOREBOARD:
+            handleScoreboard((ScoreBoardEvent *)event.get());
+            break;
         default:
             fmt::print("Received unknown event {}\n", (int)type);
             return;
@@ -108,11 +111,38 @@ void WrappedServer::handleFormRequest(const FormRequestEvent *event) {
     sendForm(event->formId, event->jsonData);
 }
 
+void WrappedServer::handleScoreboard(const ScoreBoardEvent *event) {
+    auto displayPacket = SetDisplayObjectivePacket(event->type, event->name, event->title, "dummy", event->sortDescending ? ObjectiveSortOrder::Descending : ObjectiveSortOrder::Ascending);
+    std::vector<ScorePacketInfo> info;
+    for (const auto &p: event->entries) {
+        auto k = ScorePacketInfo(
+            ScoreboardId(p.entryId),
+            event->name,
+            IdentityDefinition::Type::Fake,
+            p.score,
+            p.entryName
+        );
+        k.pid = p.pid;
+        k.aid = p.actorId;
+        info.push_back(k);
+    }
+    auto scorePacket = SetScorePacket(info);
+
+    if (event->isDirected()) {
+        sendPacketTo(event->to, &displayPacket);
+        sendPacketTo(event->to, &scorePacket);
+        return;
+    }
+
+    broadcastPacket(&displayPacket);
+    broadcastPacket(&scorePacket);
+}
+
 void WrappedServer::handleMessageEvent(const MessageEvent *event) {
     TextPacket packet = TextPacket::createFromEvent(event);
     if (event->isDirected()) {
         if (!sendPacketTo(event->to, &packet)) {
-            fmt::print("Cannot send message to player {}\n", event->to);
+            Log::Error("Cannot send message to player {}\n", event->to);
         }
         return;
     }

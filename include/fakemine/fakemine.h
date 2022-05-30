@@ -23,6 +23,11 @@
 #include "binaryStream.h"
 #include "ModalFormRequestPacket.h"
 #include "ModalFormResponsePacket.h"
+#include "DisplayObjectivePacket.h"
+#include "SetScorePacket.h"
+#include "ScoreBoardId.h"
+#include "ScorePacket.h"
+#include "ChatEvent.h"
 
 struct ServerNetworkHandler {
     void *unk0[8];

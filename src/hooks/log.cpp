@@ -30,6 +30,6 @@ void *Hook::bedLog(LogCategory category, int bitset, LogRule rules, LogAreaID ar
     }
 
     WriteOutputEvent(std::make_shared<LogEvent>((int)category, bitset, (int)rules, (int)area, unk0, func, functionLine, data));
-    Log::Bedlog("[SERVER] {}\n", data);
+    Log::Bedlog("[BDS] {}\n", data);
     return nullptr;
 }

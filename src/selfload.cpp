@@ -44,16 +44,18 @@ SelfSymbols getSelfSymbols() {
                     case STT_FUNC:
                         self.functions[name] = (void *)value;
                         symbolsLoaded++;
-                        e = name.substr(name.length() - 4);
-                        if (e == "D2Ev" && self.functions.count("D1Ev") == 0) {
-                            // Workarround for full destructors
-                            // Some classes in bedrock server doesnt have full destructor (D1Ev)
-                            // So here we map as a D2Ev (partial destructor)
-                            // This might be unsafe, but at least doesnt crash
-                            // Since this function checks if there is already a D1Ev,
-                            // it is not a problem for classes that does have D1Ev
-                            name[name.length() - 3] = '1';
-                            self.functions[name] = (void *)value;
+                        if (name.length() > 4) {
+                            e = name.substr(name.length() - 4);
+                            if (e == "D2Ev" && self.functions.count("D1Ev") == 0) {
+                                // Workarround for full destructors
+                                // Some classes in bedrock server doesnt have full destructor (D1Ev)
+                                // So here we map as a D2Ev (partial destructor)
+                                // This might be unsafe, but at least doesnt crash
+                                // Since this function checks if there is already a D1Ev,
+                                // it is not a problem for classes that does have D1Ev
+                                name[name.length() - 3] = '1';
+                                self.functions[name] = (void *)value;
+                            }
                         }
                         break;
                     case STT_OBJECT:

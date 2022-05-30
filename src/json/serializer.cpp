@@ -8,6 +8,7 @@
 #include <event/message.h>
 #include <event/playerlist.h>
 #include <event/playerupdate.h>
+#include <event/scoreboard.h>
 #include <jsoncpp/json/reader.h>
 #include <jsoncpp/json/writer.h>
 
@@ -74,6 +75,8 @@ std::shared_ptr<HockEvent> CJsonSerializer::DeserializeEvent(const std::string &
         case HockEventType::EVENT_FORM_RESPONSE:
             event = std::make_shared<FormResponseEvent>();
             break;
+        case HockEventType::EVENT_SCOREBOARD:
+            event = std::make_shared<ScoreBoardEvent>();
         default:
             event = nullptr;
     }
