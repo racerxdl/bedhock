@@ -75,6 +75,9 @@ void *Hook::Level_onPlayerDeath(void *thisObj, Player *player, ActorDamageSource
     auto p = std::make_shared<PlayerDeathEvent>(username, xuid, cause);
     WriteOutputEvent(p);
 
+    singleton->playerDeaths[username]++;
+    singleton->SavePlayerDeaths();
+
     return singleton->o_Level_onPlayerDeath(thisObj, player, actorDamageSource);
 }
 

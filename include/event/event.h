@@ -20,6 +20,8 @@ enum class HockEventType {
     EVENT_FORM_REQUEST = 8,
     EVENT_FORM_RESPONSE = 9,
     EVENT_SCOREBOARD = 10,
+    EVENT_PLAYER_DEATH_COUNT_REQUEST = 11,
+    EVENT_PLAYER_DEATH_COUNT_RESPONSE = 12,
 };
 
 class HockEvent : public IJsonSerializable {

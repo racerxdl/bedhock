@@ -7,6 +7,7 @@
 #include <event/message.h>
 #include <event/playerlist.h>
 #include <event/scoreboard.h>
+#include <event/playerDeath.h>
 #include <fakemine/fakemine.h>
 #include <hook.h>
 
@@ -18,6 +19,7 @@ class WrappedServer {
     void handlePlayerList(const PlayerListEvent *event);
     void handleFormRequest(const FormRequestEvent *event);
     void handleScoreboard(const ScoreBoardEvent *event);
+    void handlePlayerDeathRequest(const PlayerDeathCountRequestEvent *event);
 
    public:
     inline WrappedPlayer getServerPlayer(NetworkIdentifier const &id) {

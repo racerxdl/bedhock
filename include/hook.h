@@ -36,12 +36,15 @@ private:
     std::map<ulong, std::string> hashToPlayer;
     std::map<std::string, std::string> playerToXuid;
 
+    std::map<std::string, int> playerDeaths;
+
     std::atomic<bool> stopped{};
 
     Hook();
 
     void Init(const SymbolMap &sym);
-
+    void SavePlayerDeaths();
+    void LoadPlayerDeaths();
     template<typename T>
     bool hookFunc(const std::string &name, const std::string &hname, std::function<T> &hookOrigFn, void *target);
 
@@ -111,4 +114,7 @@ public:
 
     static void WriteOutputEvent(std::shared_ptr<HockEvent> event);
 
+    inline std::map<std::string, int> GetPlayerDeaths() {
+        return playerDeaths;
+    };
 };

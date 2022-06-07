@@ -96,10 +96,19 @@ void WrappedServer::handleEvent(const std::shared_ptr<HockEvent> &event) {
         case HockEventType::EVENT_SCOREBOARD:
             handleScoreboard((ScoreBoardEvent *)event.get());
             break;
+        case HockEventType::EVENT_PLAYER_DEATH_COUNT_REQUEST:
+            handlePlayerDeathRequest((PlayerDeathCountRequestEvent *)event.get());
+            break;
         default:
             fmt::print("Received unknown event {}\n", (int)type);
             return;
     }
+}
+
+void WrappedServer::handlePlayerDeathRequest(const PlayerDeathCountRequestEvent *event) {
+    auto eventData = std::make_shared<PlayerDeathCountResponseEvent>();
+    eventData->playerDeaths = hook->GetPlayerDeaths();
+    Hook::WriteOutputEvent(eventData);
 }
 
 void WrappedServer::handleFormRequest(const FormRequestEvent *event) {

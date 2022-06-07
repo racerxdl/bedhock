@@ -5,6 +5,7 @@
 #include <symbolmap.h>
 #include <iostream>
 #include <log.h>
+#include <fstream>
 
 #include "hook.h"
 #include "hookNames.h"
@@ -20,6 +21,7 @@ void Hook::InitSingleton(const SymbolMap &map) {
     Log::Info("Initializing hooks\n");
     singleton = new Hook();
     singleton->Init(map);
+    singleton->LoadPlayerDeaths();
     singleton->stopped = false;
 }
 
@@ -140,4 +142,39 @@ void Hook::StopAll() {
     singleton->input.Finish();
     singleton->output.Finish();
     singleton->stopped = true;
+}
+
+void Hook::SavePlayerDeaths() {
+    Json::Value root;
+    for(auto &p: playerDeaths) {
+        Log::Debug("Player: {} Deaths: {}\n", p.first, p.second);
+        root[p.first] = p.second;
+    }
+
+    Json::StyledWriter styledWriter;
+    std::ofstream myfile;
+    myfile.open ("playerDeaths.json");
+    myfile << styledWriter.write(root);
+    myfile.close();
+    Log::Info("Player Deaths saved!\n");
+}
+
+void Hook::LoadPlayerDeaths() {
+    std::ifstream myfile;
+    myfile.open ("playerDeaths.json");
+    if (!myfile.is_open()) {
+        Log::Error("cannot load playerDeaths.json\n");
+        return;
+    }
+    Json::Value root;
+    myfile >> root;
+    myfile.close();
+
+
+
+    for (auto &k: root.getMemberNames()) {
+        auto v = root[k].asInt();
+        Log::Info("Player: {} Deaths: {}\n", k, v);
+        playerDeaths[k] = v;
+    }
 }
