@@ -6,7 +6,7 @@
 #include <event/form.h>
 #include "hook.h"
 
-#define MAX_QUEUE_PROC 16
+#define MAX_QUEUE_PROC 64
 
 void *Hook::ServerNetworkHandler_onTick(void *thisObj) {
     static std::shared_ptr<subhook::Hook> hook;

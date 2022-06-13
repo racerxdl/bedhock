@@ -19,6 +19,7 @@ void EventHockThread() {
     socket.bind("tcp://*:5555");
 
     while (!Hook::IsStopped()) {
+        bool rxEvent = false, txEvent = false;
         zmq::message_t request;
         auto res = socket.recv(request, zmq::recv_flags::dontwait);
         if (res > 0) {
@@ -26,6 +27,7 @@ void EventHockThread() {
             if (event != nullptr) {
                 Hook::WriteInputEvent(event);
             }
+            rxEvent = true;
         }
 
         auto e = std::make_shared<HockEvent>();
@@ -35,11 +37,20 @@ void EventHockThread() {
             if (!ok) {
                 Log::Error("Error serializing event\n");
             } else if (socket.handle() != nullptr) {  // Only send when connected
-                socket.send(zmq::buffer(j), zmq::send_flags::dontwait);
+                auto res = socket.send(zmq::buffer(j), zmq::send_flags::dontwait);
+                if (res.has_value() && res <= 0) {
+                    Log::Error("Error sending event: code %d\n", res.value());
+                    Hook::WriteOutputEvent(e); // Re-queue
+                }
             }
+            txEvent = true;
         }
 
-        std::this_thread::sleep_for(10ms);
+        if (rxEvent || txEvent) {
+            std::this_thread::yield();
+        } else {
+            std::this_thread::sleep_for(1ms);
+        }
     }
     Log::Info("EventHock Thread Stopped\n");
 }

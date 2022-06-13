@@ -117,6 +117,7 @@ bool Hook::ReadOutputEvent(std::shared_ptr<HockEvent> &event) {
 }
 void Hook::WriteInputEvent(std::shared_ptr<HockEvent> event) {
     if (singleton->input.Size() >= MAX_QUEUE_LENGTH) {
+        Log::Error("WriteInputEvent: Discard samples due Queue Overflow. Size: %d\n", singleton->input.Size());
         auto discard = std::make_shared<HockEvent>();
         std::ignore = singleton->input.Consume(discard); // Discard one
     }
@@ -124,6 +125,7 @@ void Hook::WriteInputEvent(std::shared_ptr<HockEvent> event) {
 }
 void Hook::WriteOutputEvent(std::shared_ptr<HockEvent> event) {
     if (singleton->output.Size() >= MAX_QUEUE_LENGTH) {
+        Log::Error("WriteOutputEvent: Discard samples due Queue Overflow. Size: %d\n", singleton->input.Size());
         auto discard = std::make_shared<HockEvent>();
         std::ignore = singleton->output.Consume(discard); // Discard one
     }
